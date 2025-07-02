@@ -19,10 +19,8 @@ topology:
       kind: nokia_srlinux
     edge1:
       kind: arista_ceos
-      startup-config: uat-configs/arista-edge1.conf
     edge2:
       kind: arista_ceos
-      startup-config: uat-configs/arista-edge2.conf
 
     gnmic-ingestor:
       kind: linux
