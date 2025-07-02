@@ -12,10 +12,10 @@ loader:
         insecure: false
         password: NokiaSrl1!
         subscriptions:
-          - oc-states
-          - oc-counters
-          - srl-states
-          - srl-counters
+          #- srl-oc-states
+          #- srl-oc-counters
+          - srl-native-states
+          - srl-native-counters
     - containers:
         - label=clab-node-kind: arista_ceos
       port: "6030"
@@ -24,24 +24,24 @@ loader:
         insecure: true
         password: admin
         subscriptions:
-          - oc-states
-          - oc-counters
-          - eos-states
-          - eos-counters
+          - eos-oc-states
+          - eos-oc-counters
+          - eos-native-states
+          - eos-native-counters
 
 subscriptions:
-  oc-states:
+  eos-oc-states:
     stream-mode: on_change
     heartbeat-interval: 5m
     paths:
-      - interfaces/interface[name=*]/state/oper-status
-      - interfaces/interface[name=*]/subinterfaces/subinterface[name=*]/state/oper-status
+      - interfaces/interface/state/oper-status
+      - interfaces/interface/subinterfaces/subinterface/state/oper-status
       - components/component/transceiver/physical-channels/channel/state/
       - network-instances/network-instance/protocols/protocol/bgp/neighbors/neighbor/state
     outputs:
       - nats-states-output
 
-  oc-counters:
+  eos-oc-counters:
     stream-mode: sample
     sample-interval: 15s
     paths:
@@ -51,7 +51,7 @@ subscriptions:
     outputs:
       - nats-states-output
 
-  eos-states:
+  eos-native-states:
     stream-mode: on_change
     heartbeat-interval: 5m
     paths:
@@ -59,7 +59,7 @@ subscriptions:
     outputs:
       - nats-states-output
 
-  eos-counters:
+  eos-native-counters:
     stream-mode: sample
     sample-interval: 15s
     paths:
@@ -67,7 +67,7 @@ subscriptions:
     outputs:
       - nats-states-output
 
-  srl-states:
+  srl-native-states:
     stream-mode: on_change
     heartbeat-interval: 5m
     paths:
@@ -79,7 +79,7 @@ subscriptions:
     outputs:
       - nats-states-output
 
-  srl-counters:
+  srl-native-counters:
     stream-mode: sample
     sample-interval: 15s
     paths:
