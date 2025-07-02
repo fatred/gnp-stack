@@ -1,17 +1,73 @@
 ---
 username: admin
-password: NokiaSrl1!
-skip-verify: true
 log: true
 
 loader:
   type: docker
   filters:
     - containers:
-      - label=clab-node-kind: nokia_srlinux
+        - label=clab-node-kind: nokia_srlinux
+      config:
+        skip-verify: true
+        insecure: false
+        password: NokiaSrl1!
+        subscriptions:
+          - oc-states
+          - oc-counters
+          - srl-states
+          - srl-counters
+    - containers:
+        - label=clab-node-kind: arista_ceos
+      port: "6030"
+      config:
+        skip-verify: false
+        insecure: true
+        password: admin
+        subscriptions:
+          - oc-states
+          - oc-counters
+          - eos-states
+          - eos-counters
 
 subscriptions:
-  states:
+  oc-states:
+    stream-mode: on_change
+    heartbeat-interval: 5m
+    paths:
+      - interfaces/interface[name=*]/state/oper-status
+      - interfaces/interface[name=*]/subinterfaces/subinterface[name=*]/state/oper-status
+      - components/component/transceiver/physical-channels/channel/state/
+      - network-instances/network-instance/protocols/protocol/bgp/neighbors/neighbor/state
+    outputs:
+      - nats-states-output
+
+  oc-counters:
+    stream-mode: sample
+    sample-interval: 15s
+    paths:
+      - components/component/cpu
+      - components/component/state
+      - network-instances/network-instance[name=*]/protocols/protocol[identifier=BGP][name=BGP]/bgp/neighbors/neighbor[neighbor-address=*1]/afi-safis/afi-safi[afi-safi-name=openconfig-bgp-types:IPV4_UNICAST]/state/prefixes/received
+    outputs:
+      - nats-states-output
+
+  eos-states:
+    stream-mode: on_change
+    heartbeat-interval: 5m
+    paths:
+      - eos_native:/Eos/image
+    outputs:
+      - nats-states-output
+
+  eos-counters:
+    stream-mode: sample
+    sample-interval: 15s
+    paths:
+      - eos_native:/Kernel/proc/cpu
+    outputs:
+      - nats-states-output
+
+  srl-states:
     stream-mode: on_change
     heartbeat-interval: 5m
     paths:
@@ -22,18 +78,12 @@ subscriptions:
       - /platform/power-supply[id=*]/oper-state
     outputs:
       - nats-states-output
-  counters:
+
+  srl-counters:
     stream-mode: sample
     sample-interval: 15s
     paths:
-      - /interface[name=*]/statistics/in-octets
-      - /interface[name=*]/statistics/out-octets
-      - /interface[name=*]/statistics/in-packets
-      - /interface[name=*]/statistics/out-packets
-      - /interface[name=*]/statistics/in-discarded-packets
-      - /interface[name=*]/statistics/out-discarded-packets
-      - /interface[name=*]/statistics/in-error-packets
-      - /interface[name=*]/statistics/out-error-packets
+      - /interface[name=*]/statistics
     outputs:
       - nats-counters-output
 
