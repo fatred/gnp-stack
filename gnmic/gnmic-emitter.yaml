@@ -2,7 +2,7 @@
 log: true
 
 inputs:
-  nats-states-input:
+  nats-states-processed-input:
     # required string, type of input
     type: jetstream
 
@@ -15,7 +15,7 @@ inputs:
     address: nats:4222
 
     # string, name of the JetStream stream to consume from
-    stream: states-stream
+    stream: states-stream-processed
 
     # list of subject filters within the stream to consume from
     subjects: []
@@ -69,7 +69,74 @@ inputs:
     # event-processors:
       # - add-tags
 
-  nats-counters-input:
+  nats-states-direct-input:
+    # required string, type of input
+    type: jetstream
+
+    # optional string, input instance name
+    # defaults to a generated name if empty
+    name: gnmic-emitter-states
+
+    # string, NATS server address
+    # default: "localhost:4222"
+    address: nats:4222
+
+    # string, name of the JetStream stream to consume from
+    stream: states-stream-direct
+
+    # list of subject filters within the stream to consume from
+    subjects: []
+
+    # enum string, format of consumed message: "event" or "proto"
+    # default: "event"
+    format: event
+
+    # enum string, delivery policy for JetStream:
+    # one of: all, last, new, last-per-subject
+    # default: all
+    deliver-policy: new
+
+    # optional string, subject format used to extract metadata
+    # one of: static, subscription.target, target.subscription
+    # affects proto messages only
+    subject-format: subscription.target
+
+    # optional string, NATS username
+    # username: nats-user
+
+    # optional string, NATS password
+    # password: secret
+
+    # optional duration, reconnect wait time
+    # default: 2s
+    connect-time-wait: 3s
+
+    # optional bool, enables debug logging
+    debug: false
+
+    # integer, number of workers to start (parallel consumers)
+    # default: 1
+    num-workers: 1
+
+    # integer, internal per-worker buffer size
+    # default: 500
+    buffer-size: 1000
+
+    # integer, batch size when fetching messages from JetStream
+    # default: 500
+    fetch-batch-size: 500
+
+    # optional list of output names this input writes to
+    # outputs must be configured at the root `outputs:` section
+    outputs:
+      - prom-write
+
+    # optional list of event processors
+    # only applies when format is "event"
+    # event-processors:
+      # - add-tags
+
+  nats-counters-processed-input:
     # required string, type of input
     type: jetstream
 
@@ -82,7 +149,74 @@ inputs:
     address: nats:4222
 
     # string, name of the JetStream stream to consume from
-    stream: counters-stream
+    stream: counters-stream-processed
+
+    # list of subject filters within the stream to consume from
+    subjects: []
+
+    # enum string, format of consumed message: "event" or "proto"
+    # default: "event"
+    format: event
+
+    # enum string, delivery policy for JetStream:
+    # one of: all, last, new, last-per-subject
+    # default: all
+    deliver-policy: new
+
+    # optional string, subject format used to extract metadata
+    # one of: static, subscription.target, target.subscription
+    # affects proto messages only
+    subject-format: subscription.target
+
+    # optional string, NATS username
+    # username: nats-user
+
+    # optional string, NATS password
+    # password: secret
+
+    # optional duration, reconnect wait time
+    # default: 2s
+    connect-time-wait: 3s
+
+    # optional bool, enables debug logging
+    debug: false
+
+    # integer, number of workers to start (parallel consumers)
+    # default: 1
+    num-workers: 1
+
+    # integer, internal per-worker buffer size
+    # default: 500
+    buffer-size: 1000
+
+    # integer, batch size when fetching messages from JetStream
+    # default: 500
+    fetch-batch-size: 500
+
+    # optional list of output names this input writes to
+    # outputs must be configured at the root `outputs:` section
+    outputs:
+      - prom-write
+
+    # optional list of event processors
+    # only applies when format is "event"
+    # event-processors:
+      # - add-tags
+
+  nats-counters-direct-input:
+    # required string, type of input
+    type: jetstream
+
+    # optional string, input instance name
+    # defaults to a generated name if empty
+    name: gnmic-emitter-counters
+
+    # string, NATS server address
+    # default: "localhost:4222"
+    address: nats:4222
+
+    # string, name of the JetStream stream to consume from
+    stream: counters-stream-direct
 
     # list of subject filters within the stream to consume from
     subjects: []
