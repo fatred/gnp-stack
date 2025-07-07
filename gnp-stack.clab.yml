@@ -34,14 +34,14 @@ topology:
         - /var/run/docker.sock:/var/run/docker.sock # allows docker loader in gnmic config
       cmd: '--config /app/gnmic.yaml --log subscribe'
 
-    # gnmic-processor:
-    #   kind: linux
-    #   image: gnmic:0.41.1
-    #   ports:
-    #     - 9805:9804
-    #   binds:
-    #     - ./gnmic/gnmic-processor.yaml:/app/gnmic.yaml:ro
-    #   cmd: '--config /app/gnmic.yaml --log subscribe'
+    gnmic-processor:
+      kind: linux
+      image: gnmic:0.41.1
+      ports:
+        - 9805:9804
+      binds:
+        - ./gnmic/gnmic-processor.yaml:/app/gnmic.yaml:ro
+      cmd: '--config /app/gnmic.yaml --log subscribe'
 
     gnmic-emitter:
       kind: linux
