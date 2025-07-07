@@ -384,9 +384,32 @@ outputs:
     # boolean, enables the collection and export (via prometheus) of output specific metrics
     enable-metrics: true
     # list of processors to apply to the message before writing
-    event-processors: []
+    event-processors:
+      - arista-up-down-map
 
-processors: {}
+processors:
+  arista-up-down-map:
+    event-strings:
+      value-names:
+        - oper-status
+        - admin-status
+      transforms:
+        - replace:
+            apply-on: "value"
+            old: "up"
+            new: "1"
+        - replace:
+            apply-on: "value"
+            old: "UP"
+            new: "1"
+        - replace:
+            apply-on: "value"
+            old: "down"
+            new: "0"
+        - replace:
+            apply-on: "value"
+            old: "DOWN"
+            new: "0"
 
 api-server:
   # string, in the form IP:port, the IP part can be omitted.
