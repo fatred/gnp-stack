@@ -8,7 +8,7 @@ inputs:
 
     # optional string, input instance name
     # defaults to a generated name if empty
-    name: gnmic-emitter-states
+    name: gnmic-emitter-states-processed
 
     # string, NATS server address
     # default: "localhost:4222"
@@ -75,7 +75,7 @@ inputs:
 
     # optional string, input instance name
     # defaults to a generated name if empty
-    name: gnmic-emitter-states
+    name: gnmic-emitter-states-direct
 
     # string, NATS server address
     # default: "localhost:4222"
@@ -142,7 +142,7 @@ inputs:
 
     # optional string, input instance name
     # defaults to a generated name if empty
-    name: gnmic-emitter-counters
+    name: gnmic-emitter-counters-processed
 
     # string, NATS server address
     # default: "localhost:4222"
