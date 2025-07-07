@@ -14,8 +14,10 @@ loader:
         subscriptions:
           #- srl-oc-states
           #- srl-oc-counters
-          - srl-native-states
-          - srl-native-counters
+          - srl-native-states-direct
+          - srl-native-states-raw
+          - srl-native-counters-direct
+          - srl-native-counters-raw
     - containers:
         - label=clab-node-kind: arista_ceos
       port: "6030"
@@ -24,34 +26,52 @@ loader:
         insecure: true
         password: admin
         subscriptions:
-          - eos-oc-states
-          - eos-oc-counters
-          - eos-native-states
-          - eos-native-counters
+          - eos-oc-states-direct
+          - eos-oc-states-raw
+          - eos-oc-counters-direct
+          - eos-oc-counters-raw
+          - eos-native-states-direct
+          - eos-native-states-raw
+          - eos-native-counters-direct
+          - eos-native-counters-raw
 
 subscriptions:
-  eos-oc-states:
+  eos-oc-states-direct:
     stream-mode: on_change
     heartbeat-interval: 5m
     paths:
       - interfaces/interface/state/oper-status
       - interfaces/interface/subinterfaces/subinterface/state/oper-status
+    outputs:
+      - nats-states-direct-output
+  
+  eos-oc-states-raw:
+    stream-mode: on_change
+    heartbeat-interval: 5m
+    paths:
       - components/component/transceiver/physical-channels/channel/state/
-      - network-instances/network-instance/protocols/protocol/bgp/neighbors/neighbor/state
+      - network-instances/network-instance/protocols/protocol/bgp/neighbors
     outputs:
       - nats-states-raw-output
 
-  eos-oc-counters:
+  eos-oc-counters-direct:
     stream-mode: sample
     sample-interval: 15s
     paths:
       - components/component/cpu
+    outputs:
+      - nats-states-direct-output
+
+  eos-oc-counters-raw:
+    stream-mode: sample
+    sample-interval: 15s
+    paths:
       - components/component/state
       - network-instances/network-instance[name=*]/protocols/protocol[identifier=BGP][name=BGP]/bgp/neighbors/neighbor[neighbor-address=*1]/afi-safis/afi-safi[afi-safi-name=openconfig-bgp-types:IPV4_UNICAST]/state/prefixes/received
     outputs:
       - nats-states-raw-output
 
-  eos-native-states:
+  eos-native-states-direct:
     stream-mode: on_change
     heartbeat-interval: 5m
     paths:
@@ -59,7 +79,23 @@ subscriptions:
     outputs:
       - nats-states-direct-output
 
-  eos-native-counters:
+  eos-native-states-raw:
+    stream-mode: on_change
+    heartbeat-interval: 5m
+    paths:
+      - eos_native:/Kernel/proc/cpu/utilization
+    outputs:
+      - nats-states-raw-output
+
+  eos-native-counters-direct:
+    stream-mode: sample
+    sample-interval: 15s
+    paths:
+      - eos_native:/Kernel/proc/cpu
+    outputs:
+      - nats-states-direct-output
+
+  eos-native-counters-raw:
     stream-mode: sample
     sample-interval: 15s
     paths:
@@ -67,19 +103,34 @@ subscriptions:
     outputs:
       - nats-states-raw-output
 
-  srl-native-states:
+  srl-native-states-direct:
     stream-mode: on_change
     heartbeat-interval: 5m
     paths:
       - /interface[name=*]/oper-state
-      - /network-instance[name=*]/protocols/bgp/neighbor[peer-address=*]/afi-safi[afi-safi-name=*]/oper-state
-      - /network-instance[name=*]/protocols/ospf/instance[name=*]/oper-state
       - /platform/fan-tray[id=*]/oper-state
       - /platform/power-supply[id=*]/oper-state
     outputs:
+      - nats-states-direct-output
+
+  srl-native-states-raw:
+    stream-mode: on_change
+    heartbeat-interval: 5m
+    paths:
+      - /network-instance[name=*]/protocols/bgp/neighbor[peer-address=*]/afi-safi[afi-safi-name=*]/oper-state
+      - /network-instance[name=*]/protocols/ospf/instance[name=*]/oper-state
+    outputs:
       - nats-states-raw-output
 
-  srl-native-counters:
+  srl-native-counters-direct:
+    stream-mode: sample
+    sample-interval: 15s
+    paths:
+      - /interface[name=*]/statistics
+    outputs:
+      - nats-counters-direct-output
+
+  srl-native-counters-raw:
     stream-mode: sample
     sample-interval: 15s
     paths:
