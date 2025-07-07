@@ -96,7 +96,7 @@ outputs:
     # if left empty, this field is populated with the output name used as output ID (output1 in this example).
     # If the flag --instance-name is not empty, the full name will be '$(instance-name)-$(name).
     # note that each jetstream worker (publisher) will get a client name=$name-$index
-    name: gnmic-ingress-counters
+    name: gnmic-ingress-counters-raw
     # Comma separated NATS servers
     address: nats:4222
     # string, stream name to write update to,
@@ -221,7 +221,7 @@ outputs:
     # if left empty, this field is populated with the output name used as output ID (output1 in this example).
     # If the flag --instance-name is not empty, the full name will be '$(instance-name)-$(name).
     # note that each jetstream worker (publisher) will get a client name=$name-$index
-    name: gnmic-ingress-states
+    name: gnmic-ingress-states-raw
     # Comma separated NATS servers
     address: nats:4222
     # string, stream name to write update to,
@@ -346,7 +346,7 @@ outputs:
     # if left empty, this field is populated with the output name used as output ID (output1 in this example).
     # If the flag --instance-name is not empty, the full name will be '$(instance-name)-$(name).
     # note that each jetstream worker (publisher) will get a client name=$name-$index
-    name: gnmic-ingress-states
+    name: gnmic-ingress-states-direct
     # Comma separated NATS servers
     address: nats:4222
     # string, stream name to write update to,
@@ -357,6 +357,131 @@ outputs:
     create-stream:
       # string, stream description
       description: telemetry states not requiring processing
+      # string list, list of subjects allowed on the stream
+      # defaults to `.create-stream.$name.>`
+      subjects: []
+      # string, one of `memory`, `file`.
+      # defines the storage type to use for the stream.
+      # defaults to `memory`
+      storage: file
+      # int64, max number of messages in the stream.
+      max-msgs: 2000000
+      # int64, max bytes the stream may contain.
+      # max-bytes:
+      # duration, max age of any message in the stream.
+      # max-age:
+      # int32, maximum message size
+      # max-msg-size:
+    # string, one of `static`, `subscription.target`, `subscription.target.path`
+    # or `subscription.target.pathKeys`.
+    # Defines the subject format.
+    # `static`:
+    #       all updates will be written to the subject name set under `outputs.$output_name.subject`
+    # `subscription.target`:
+    #       updates from each subscription, target will be written
+    #       to subject $subscription_name.$target_name
+    # `subscription.target.path`:
+    #       updates from a certain subscription, target and path
+    #       will be written to subject $subscription_name.$target_name.$path.
+    #       The path is built by joining the gNMI path pathElements with a dot (.).
+    #       e.g: /interface[name=ethernet-1/1]/statistics/in-octets
+    #       -->  interface.statistics.in-octets
+    # `subscription.target.pathKeys`:
+    #       updates from a certain subscription, a certain target and a certain path
+    #       will be written to subject $subscription_name.$target_name.$path.
+    #       The path is built by joining the gNMI path pathElements and Keys with a dot (.).
+    #       e.g: /interface[name=ethernet-1/1]/statistics/in-octets
+    #       -->  interface.{name=ethernet-1/1}.statistics.in-octets
+    # `target.subscription`:
+    #       updates from each subscription, target will be written with a prefix of the `subject`
+    #       to subject $subject.$target_name.$subscription_name if `subject` is present. If not,
+    #       it will write to $target_name.$subscription_name.
+    subject-format: subscription.target
+    # If a subject-format is `static`, gnmic will publish all subscriptions updates
+    # to a single subject configured under this field. Defaults to 'telemetry'
+    # If a subject-format is `target.subscription`, gnmic will publish subscripion
+    # updates prefixed with this subject.
+    # subject: telemetry
+    # tls config
+    # tls:
+    #   # string, path to the CA certificate file,
+    #   # this will be used to verify the clients certificates when `skip-verify` is false
+    #   ca-file:
+    #   # string, client certificate file.
+    #   cert-file:
+    #   # string, client key file.
+    #   key-file:
+    #   # boolean, if true, the client will not verify the server
+    #   # certificate against the available certificate chain.
+    #   skip-verify: false
+    # NATS username
+    # username:
+    # NATS password
+    # password:
+    # wait time before reconnection attempts
+    connect-time-wait: 2s
+    # Exported message format, one of: proto, prototext, protojson, json, event
+    format: event
+    # string, one of `overwrite`, `if-not-present`, ``
+    # This field allows populating/changing the value of Prefix.Target in the received message.
+    # if set to ``, nothing changes
+    # if set to `overwrite`, the target value is overwritten using the template configured under `target-template`
+    # if set to `if-not-present`, the target value is populated only if it is empty, still using the `target-template`
+    # add-target:
+    # string, a GoTemplate that allow for the customization of the target field in Prefix.Target.
+    # it applies only if the previous field `add-target` is not empty.
+    # if left empty, it defaults to:
+    # {{- if index . "subscription-target" -}}
+    # {{ index . "subscription-target" }}
+    # {{- else -}}
+    # {{ index . "source" | host }}
+    # {{- end -}}`
+    # which will set the target to the value configured under `subscription.$subscription-name.target` if any,
+    # otherwise it will set it to the target name stripped of the port number (if present)
+    # target-template:
+    # boolean, valid only if format is `event`.
+    # if true, arrays of events are split and marshaled as JSON objects instead of an array of dicts.
+    split-events: false
+    # string, a GoTemplate that is executed using the received gNMI message as input.
+    # the template execution is the last step before the data is written to the file.
+    # First the received message is formatted according to the `format` field above, then the `event-processors` are applied if any
+    # then finally the msg-template is executed.
+    # msg-template:
+    # boolean, if true the message timestamp is changed to current time
+    override-timestamps: false
+    # integer, number of nats publishers to be created
+    num-workers: 1
+    # duration after which a message waiting to be handled by a worker gets discarded
+    write-timeout: 5s
+    # boolean, enables extra logging for the nats output
+    debug: false
+    # integer, sets the size of the local buffer where received
+    # NATS messages are stored before being sent to outputs.
+    # This value is set per worker. Defaults to 0 messages
+    buffer-size: 0
+    # boolean, enables the collection and export (via prometheus) of output specific metrics
+    enable-metrics: true
+    # list of processors to apply to the message before writing
+    event-processors: []
+
+  nats-counters-direct-output:
+    # required
+    type: jetstream
+    # NATS publisher name
+    # if left empty, this field is populated with the output name used as output ID (output1 in this example).
+    # If the flag --instance-name is not empty, the full name will be '$(instance-name)-$(name).
+    # note that each jetstream worker (publisher) will get a client name=$name-$index
+    name: gnmic-ingress-counters-direct
+    # Comma separated NATS servers
+    address: nats:4222
+    # string, stream name to write update to,
+    # if `create-stream` is set, it will be created
+    # # may not contain spaces, tabs, period (.), greater than (>) or asterisk (*)
+    stream: counters-stream-direct
+    # defines stream parameters that gNMIc will create on the target jetstream server(s)
+    create-stream:
+      # string, stream description
+      description: telemetry counters not requiring processing
       # string list, list of subjects allowed on the stream
       # defaults to `.create-stream.$name.>`
       subjects: []
