@@ -7,7 +7,7 @@ inputs:
 
     # optional string, input instance name
     # defaults to a generated name if empty
-    name: gnmic-processor-states
+    name: gnmic-processor-counters
 
     # string, NATS server address
     # default: "localhost:4222"
@@ -386,26 +386,7 @@ outputs:
     # list of processors to apply to the message before writing
     event-processors: []
 
-processors:
-  add-dc-label-processor:
-    # processor type
-    event-add-tag:
-      value-names:
-        - ".*"
-      add:
-        dc: MY-DC
-  #rename-source:
-  #  # processor type
-  #  event-starlark:
-  #    # the source of the starlark program.
-  #    source: |
-  #      def apply(*events):
-  #        for e in events:
-  #          if e.tags.get("source"):
-  #            url = e.tags["source"].split(":", 1)[0]
-  #            hostname, domain = url.split(".", 1)
-  #            e.tags["source"] = hostname + ".processor-test"
-  #        return events
+processors: {}
 
 api-server:
   # string, in the form IP:port, the IP part can be omitted.
