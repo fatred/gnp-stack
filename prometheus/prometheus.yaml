@@ -8,3 +8,9 @@ scrape_configs:
     static_configs:
     - targets:
       - localhost:9090
+  - job_name: gnmic
+    static_configs:
+      - targets:
+        - clab-gnp-stack-gnmic-ingestor:7890
+        - clab-gnp-stack-gnmic-processor:7890
+        - clab-gnp-stack-gnmic-emitter:7890

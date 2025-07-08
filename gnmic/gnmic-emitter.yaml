@@ -370,7 +370,7 @@ api-server:
     # client-auth: ""
   # boolean, if true, the server will also handle the path /metrics and serve 
   # gNMIc's enabled prometheus metrics.
-  enable-metrics: false
+  enable-metrics: true
   # boolean, enables extra debug log printing
   debug: false
   # boolean, disables creating log messages when accessing the `healthz` path
