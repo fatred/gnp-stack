@@ -16,9 +16,7 @@ inputs:
     buffer-size: 1000
     fetch-batch-size: 500
     outputs:
-      - nats-srl-processed
-    event-processors:
-      - thing
+      - nats-srl-out
 
   nats-eos-in:
     type: jetstream
@@ -35,9 +33,7 @@ inputs:
     buffer-size: 1000
     fetch-batch-size: 500
     outputs:
-      - nats-eos-processed
-    event-processors:
-      - thing
+      - nats-eos-out
       
  
 outputs:
