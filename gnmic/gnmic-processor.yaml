@@ -1,177 +1,177 @@
-log: true
+# log: true
 
-inputs:
-  nats-srl-in:
-    type: jetstream
-    name: gnmic-srl-preprocessor
-    address: nats:4222
-    stream: srl-ingress
-    subjects: []
-    format: event
-    deliver-policy: new
-    subject-format: subscription.target
-    connect-time-wait: 3s
-    debug: false
-    num-workers: 1
-    buffer-size: 1000
-    fetch-batch-size: 500
-    outputs:
-      - nats-srl-out
+# inputs:
+#   nats-srl-in:
+#     type: jetstream
+#     name: gnmic-srl-preprocessor
+#     address: nats:4222
+#     stream: srl-ingress
+#     subjects: []
+#     format: event
+#     deliver-policy: new
+#     subject-format: subscription.target
+#     connect-time-wait: 3s
+#     debug: false
+#     num-workers: 1
+#     buffer-size: 1000
+#     fetch-batch-size: 500
+#     outputs:
+#       - nats-srl-out
 
-  nats-eos-in:
-    type: jetstream
-    name: gnmic-eos-preprocessor
-    address: nats:4222
-    stream: eos-ingress
-    subjects: []
-    format: event
-    deliver-policy: new
-    subject-format: subscription.target
-    connect-time-wait: 3s
-    debug: false
-    num-workers: 1
-    buffer-size: 1000
-    fetch-batch-size: 500
-    outputs:
-      - nats-eos-out 
+#   nats-eos-in:
+#     type: jetstream
+#     name: gnmic-eos-preprocessor
+#     address: nats:4222
+#     stream: eos-ingress
+#     subjects: []
+#     format: event
+#     deliver-policy: new
+#     subject-format: subscription.target
+#     connect-time-wait: 3s
+#     debug: false
+#     num-workers: 1
+#     buffer-size: 1000
+#     fetch-batch-size: 500
+#     outputs:
+#       - nats-eos-out 
  
-outputs:
-  nats-srl-out:
-    type: jetstream
-    name: gnmic-srl-postprocessor
-    address: nats:4222
-    stream: srl-egress
-    create-stream:
-      description: srl telemetry data post processing
-      subjects: []
-      storage: file
-      max-msgs: 2000000
-      # max-bytes:
-      # max-age:
-      # max-msg-size:
-    subject-format: subscription.target
-    # tls:
-    #   # string, path to the CA certificate file,
-    #   # this will be used to verify the clients certificates when `skip-verify` is false
-    #   ca-file:
-    #   # string, client certificate file.
-    #   cert-file:
-    #   # string, client key file.
-    #   key-file:
-    #   # boolean, if true, the client will not verify the server
-    #   # certificate against the available certificate chain.
-    #   skip-verify: false
-    connect-time-wait: 2s
-    format: event
-    split-events: false
-    override-timestamps: false
-    num-workers: 1
-    write-timeout: 5s
-    debug: false
-    buffer-size: 0
-    enable-metrics: true
-    event-processors:
-      - srl-up-down-map
+# outputs:
+#   nats-srl-out:
+#     type: jetstream
+#     name: gnmic-srl-postprocessor
+#     address: nats:4222
+#     stream: srl-egress
+#     create-stream:
+#       description: srl telemetry data post processing
+#       subjects: []
+#       storage: file
+#       max-msgs: 2000000
+#       # max-bytes:
+#       # max-age:
+#       # max-msg-size:
+#     subject-format: subscription.target
+#     # tls:
+#     #   # string, path to the CA certificate file,
+#     #   # this will be used to verify the clients certificates when `skip-verify` is false
+#     #   ca-file:
+#     #   # string, client certificate file.
+#     #   cert-file:
+#     #   # string, client key file.
+#     #   key-file:
+#     #   # boolean, if true, the client will not verify the server
+#     #   # certificate against the available certificate chain.
+#     #   skip-verify: false
+#     connect-time-wait: 2s
+#     format: event
+#     split-events: false
+#     override-timestamps: false
+#     num-workers: 1
+#     write-timeout: 5s
+#     debug: false
+#     buffer-size: 0
+#     enable-metrics: true
+#     event-processors:
+#       - srl-up-down-map
 
-  nats-eos-out:
-    type: jetstream
-    name: gnmic-eos-postprocessor
-    address: nats:4222
-    stream: eos-egress
-    create-stream:
-      description: eos telemetry data post processing
-      subjects: []
-      storage: file
-      max-msgs: 2000000
-      # max-bytes:
-      # max-age:
-      # max-msg-size:
-    subject-format: subscription.target
-    # tls:
-    #   # string, path to the CA certificate file,
-    #   # this will be used to verify the clients certificates when `skip-verify` is false
-    #   ca-file:
-    #   # string, client certificate file.
-    #   cert-file:
-    #   # string, client key file.
-    #   key-file:
-    #   # boolean, if true, the client will not verify the server
-    #   # certificate against the available certificate chain.
-    #   skip-verify: false
-    connect-time-wait: 2s
-    format: event
-    split-events: false
-    override-timestamps: false
-    num-workers: 1
-    write-timeout: 5s
-    debug: false
-    buffer-size: 0
-    enable-metrics: true
-    event-processors:
-      - eos-up-down-map
+#   nats-eos-out:
+#     type: jetstream
+#     name: gnmic-eos-postprocessor
+#     address: nats:4222
+#     stream: eos-egress
+#     create-stream:
+#       description: eos telemetry data post processing
+#       subjects: []
+#       storage: file
+#       max-msgs: 2000000
+#       # max-bytes:
+#       # max-age:
+#       # max-msg-size:
+#     subject-format: subscription.target
+#     # tls:
+#     #   # string, path to the CA certificate file,
+#     #   # this will be used to verify the clients certificates when `skip-verify` is false
+#     #   ca-file:
+#     #   # string, client certificate file.
+#     #   cert-file:
+#     #   # string, client key file.
+#     #   key-file:
+#     #   # boolean, if true, the client will not verify the server
+#     #   # certificate against the available certificate chain.
+#     #   skip-verify: false
+#     connect-time-wait: 2s
+#     format: event
+#     split-events: false
+#     override-timestamps: false
+#     num-workers: 1
+#     write-timeout: 5s
+#     debug: false
+#     buffer-size: 0
+#     enable-metrics: true
+#     event-processors:
+#       - eos-up-down-map
 
-processors:
-  # srl
-  srl-up-down-map:
-    event-strings:
-      value-names:
-        - "oper-state"
-      transforms:
-        - replace:
-            apply-on: "value"
-            old: "UP"
-            new: "1"
-        - replace:
-            apply-on: "value"
-            old: "DOWN"
-  # eos          
-  eos-up-down-map:
-    event-strings:
-      value-names:
-        - oper-status
-        - admin-status
-      transforms:
-        - replace:
-            apply-on: "value"
-            old: "up"
-            new: "1"
-        - replace:
-            apply-on: "value"
-            old: "UP"
-            new: "1"
-        - replace:
-            apply-on: "value"
-            old: "down"
-            new: "0"
-        - replace:
-            apply-on: "value"
-            old: "DOWN"
-            new: "0"
+# processors:
+#   # srl
+#   srl-up-down-map:
+#     event-strings:
+#       value-names:
+#         - "oper-state"
+#       transforms:
+#         - replace:
+#             apply-on: "value"
+#             old: "UP"
+#             new: "1"
+#         - replace:
+#             apply-on: "value"
+#             old: "DOWN"
+#   # eos          
+#   eos-up-down-map:
+#     event-strings:
+#       value-names:
+#         - oper-status
+#         - admin-status
+#       transforms:
+#         - replace:
+#             apply-on: "value"
+#             old: "up"
+#             new: "1"
+#         - replace:
+#             apply-on: "value"
+#             old: "UP"
+#             new: "1"
+#         - replace:
+#             apply-on: "value"
+#             old: "down"
+#             new: "0"
+#         - replace:
+#             apply-on: "value"
+#             old: "DOWN"
+#             new: "0"
 
-api-server:
-  address: :7890
-  timeout: 10s
-  # tls:
-  #   # string, path to the CA certificate file,
-  #   # this certificate is used to verify the clients certificates.
-  #   ca-file:
-  #   # string, server certificate file.
-  #   cert-file:
-  #   # string, server key file.
-  #   key-file:
-  #   # string, one of `"", "request", "require", "verify-if-given", or "require-verify" 
-  #   #  - request:         The server requests a certificate from the client but does not 
-  #   #                     require the client to send a certificate. 
-  #   #                     If the client sends a certificate, it is not required to be valid.
-  #   #  - require:         The server requires the client to send a certificate and does not 
-  #   #                     fail if the client certificate is not valid.
-  #   #  - verify-if-given: The server requests a certificate, 
-  #   #                     does not fail if no certificate is sent. 
-  #   #                     If a certificate is sent it is required to be valid.
-  #   #  - require-verify:  The server requires the client to send a valid certificate.
-  #   #
-  #   # if no ca-file is present, `client-auth` defaults to ""`
-  #   # if a ca-file is set, `client-auth` defaults to "require-verify"`
-  enable-metrics: true
-  debug: false
-  healthz-disable-logging: true
+# api-server:
+#   address: :7890
+#   timeout: 10s
+#   # tls:
+#   #   # string, path to the CA certificate file,
+#   #   # this certificate is used to verify the clients certificates.
+#   #   ca-file:
+#   #   # string, server certificate file.
+#   #   cert-file:
+#   #   # string, server key file.
+#   #   key-file:
+#   #   # string, one of `"", "request", "require", "verify-if-given", or "require-verify" 
+#   #   #  - request:         The server requests a certificate from the client but does not 
+#   #   #                     require the client to send a certificate. 
+#   #   #                     If the client sends a certificate, it is not required to be valid.
+#   #   #  - require:         The server requires the client to send a certificate and does not 
+#   #   #                     fail if the client certificate is not valid.
+#   #   #  - verify-if-given: The server requests a certificate, 
+#   #   #                     does not fail if no certificate is sent. 
+#   #   #                     If a certificate is sent it is required to be valid.
+#   #   #  - require-verify:  The server requires the client to send a valid certificate.
+#   #   #
+#   #   # if no ca-file is present, `client-auth` defaults to ""`
+#   #   # if a ca-file is set, `client-auth` defaults to "require-verify"`
+#   enable-metrics: true
+#   debug: false
+#   healthz-disable-logging: true

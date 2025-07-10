@@ -6,7 +6,7 @@ inputs:
     type: jetstream
     name: gnmic-srl-emitter
     address: nats:4222
-    stream: srl-egress
+    stream: srl
     subjects: []
     format: event
     deliver-policy: new
@@ -18,12 +18,14 @@ inputs:
     fetch-batch-size: 500
     outputs:
       - prom-write
+    event-processors:
+      - srl-up-down-map
 
   nats-eos:
     type: jetstream
     name: gnmic-eos-emitter
     address: nats:4222
-    stream: eos-egress
+    stream: eos
     subjects: []
     format: event
     deliver-policy: new
@@ -35,6 +37,8 @@ inputs:
     fetch-batch-size: 500
     outputs:
       - prom-write
+    event-processors:
+      - eos-up-down-map
 
 outputs:
   prom-write:
@@ -50,6 +54,46 @@ outputs:
     num-workers: 1
     num-writers: 1
     debug: false
+
+
+processors:
+  # srl
+  srl-up-down-map:
+    event-strings:
+      value-names:
+        - "oper-state"
+      transforms:
+        - replace:
+            apply-on: "value"
+            old: "UP"
+            new: "1"
+        - replace:
+            apply-on: "value"
+            old: "DOWN"
+  # eos          
+  eos-up-down-map:
+    event-strings:
+      value-names:
+        - oper-status
+        - admin-status
+      transforms:
+        - replace:
+            apply-on: "value"
+            old: "up"
+            new: "1"
+        - replace:
+            apply-on: "value"
+            old: "UP"
+            new: "1"
+        - replace:
+            apply-on: "value"
+            old: "down"
+            new: "0"
+        - replace:
+            apply-on: "value"
+            old: "DOWN"
+            new: "0"
+
 
 api-server:
   address: :7890

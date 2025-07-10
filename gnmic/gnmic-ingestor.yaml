@@ -130,7 +130,7 @@ outputs:
     type: jetstream
     name: gnmic-ingress-srl
     address: nats:4222
-    stream: srl-ingress
+    stream: srl
     create-stream:
       description: srl telemetry data to be processed mid pipeline
       subjects: []
@@ -166,7 +166,7 @@ outputs:
     type: jetstream
     name: gnmic-ingress-eos
     address: nats:4222
-    stream: eos-ingress
+    stream: eos
     create-stream:
       description: eos telemetry data to be processed mid pipeline
       subjects: []
