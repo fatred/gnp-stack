@@ -45,6 +45,7 @@ outputs:
     max-time-series-per-write: 500
     strings-as-labels: true
     timeout: 10s
+    enable-metrics: true
     event-processors: []
     num-workers: 1
     num-writers: 1
