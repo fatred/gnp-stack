@@ -33,8 +33,7 @@ inputs:
     buffer-size: 1000
     fetch-batch-size: 500
     outputs:
-      - nats-eos-out
-      
+      - nats-eos-out 
  
 outputs:
   nats-srl-out:

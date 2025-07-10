@@ -162,7 +162,6 @@ outputs:
     enable-metrics: true
     event-processors: []
 
-
   nats-eos-out:
     type: jetstream
     name: gnmic-ingress-eos
