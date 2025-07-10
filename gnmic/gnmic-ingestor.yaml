@@ -100,7 +100,7 @@ subscriptions:
   eos-if-states:
     mode: stream
     stream-mode: on_change
-    heartbeat-interval: 60s
+    # heartbeat-interval: 60s
       #stream-mode: sample
       #sample-interval: 5s
     paths:
