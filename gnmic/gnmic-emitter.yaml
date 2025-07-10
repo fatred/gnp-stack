@@ -2,350 +2,59 @@
 log: true
 
 inputs:
-  nats-states-processed-input:
-    # required string, type of input
+  nats-srl:
     type: jetstream
-
-    # optional string, input instance name
-    # defaults to a generated name if empty
-    name: gnmic-emitter-states-processed
-
-    # string, NATS server address
-    # default: "localhost:4222"
+    name: gnmic-srl-emitter
     address: nats:4222
-
-    # string, name of the JetStream stream to consume from
-    stream: states-stream-processed
-
-    # list of subject filters within the stream to consume from
+    stream: srl-egress
     subjects: []
-
-    # enum string, format of consumed message: "event" or "proto"
-    # default: "event"
     format: event
-
-    # enum string, delivery policy for JetStream:
-    # one of: all, last, new, last-per-subject
-    # default: all
     deliver-policy: new
-
-    # optional string, subject format used to extract metadata
-    # one of: static, subscription.target, target.subscription
-    # affects proto messages only
     subject-format: subscription.target
-
-    # optional string, NATS username
-    # username: nats-user
-
-    # optional string, NATS password
-    # password: secret
-
-    # optional duration, reconnect wait time
-    # default: 2s
     connect-time-wait: 3s
-
-    # optional bool, enables debug logging
     debug: false
-
-    # integer, number of workers to start (parallel consumers)
-    # default: 1
     num-workers: 1
-
-    # integer, internal per-worker buffer size
-    # default: 500
     buffer-size: 1000
-
-    # integer, batch size when fetching messages from JetStream
-    # default: 500
     fetch-batch-size: 500
-
-    # optional list of output names this input writes to
-    # outputs must be configured at the root `outputs:` section
     outputs:
       - prom-write
+    event-processors: []
 
-    # optional list of event processors
-    # only applies when format is "event"
-    # event-processors:
-      # - add-tags
-
-  nats-states-direct-input:
-    # required string, type of input
+  nats-eos:
     type: jetstream
-
-    # optional string, input instance name
-    # defaults to a generated name if empty
-    name: gnmic-emitter-states-direct
-
-    # string, NATS server address
-    # default: "localhost:4222"
+    name: gnmic-eos-emitter
     address: nats:4222
-
-    # string, name of the JetStream stream to consume from
-    stream: states-stream-direct
-
-    # list of subject filters within the stream to consume from
+    stream: eos-egress
     subjects: []
-
-    # enum string, format of consumed message: "event" or "proto"
-    # default: "event"
     format: event
-
-    # enum string, delivery policy for JetStream:
-    # one of: all, last, new, last-per-subject
-    # default: all
     deliver-policy: new
-
-    # optional string, subject format used to extract metadata
-    # one of: static, subscription.target, target.subscription
-    # affects proto messages only
     subject-format: subscription.target
-
-    # optional string, NATS username
-    # username: nats-user
-
-    # optional string, NATS password
-    # password: secret
-
-    # optional duration, reconnect wait time
-    # default: 2s
     connect-time-wait: 3s
-
-    # optional bool, enables debug logging
     debug: false
-
-    # integer, number of workers to start (parallel consumers)
-    # default: 1
     num-workers: 1
-
-    # integer, internal per-worker buffer size
-    # default: 500
     buffer-size: 1000
-
-    # integer, batch size when fetching messages from JetStream
-    # default: 500
     fetch-batch-size: 500
-
-    # optional list of output names this input writes to
-    # outputs must be configured at the root `outputs:` section
     outputs:
       - prom-write
-
-    # optional list of event processors
-    # only applies when format is "event"
-    # event-processors:
-      # - add-tags
-
-  nats-counters-processed-input:
-    # required string, type of input
-    type: jetstream
-
-    # optional string, input instance name
-    # defaults to a generated name if empty
-    name: gnmic-emitter-counters-processed
-
-    # string, NATS server address
-    # default: "localhost:4222"
-    address: nats:4222
-
-    # string, name of the JetStream stream to consume from
-    stream: counters-stream-processed
-
-    # list of subject filters within the stream to consume from
-    subjects: []
-
-    # enum string, format of consumed message: "event" or "proto"
-    # default: "event"
-    format: event
-
-    # enum string, delivery policy for JetStream:
-    # one of: all, last, new, last-per-subject
-    # default: all
-    deliver-policy: new
-
-    # optional string, subject format used to extract metadata
-    # one of: static, subscription.target, target.subscription
-    # affects proto messages only
-    subject-format: subscription.target
-
-    # optional string, NATS username
-    # username: nats-user
-
-    # optional string, NATS password
-    # password: secret
-
-    # optional duration, reconnect wait time
-    # default: 2s
-    connect-time-wait: 3s
-
-    # optional bool, enables debug logging
-    debug: false
-
-    # integer, number of workers to start (parallel consumers)
-    # default: 1
-    num-workers: 1
-
-    # integer, internal per-worker buffer size
-    # default: 500
-    buffer-size: 1000
-
-    # integer, batch size when fetching messages from JetStream
-    # default: 500
-    fetch-batch-size: 500
-
-    # optional list of output names this input writes to
-    # outputs must be configured at the root `outputs:` section
-    outputs:
-      - prom-write
-
-    # optional list of event processors
-    # only applies when format is "event"
-    # event-processors:
-      # - add-tags
-
-  nats-counters-direct-input:
-    # required string, type of input
-    type: jetstream
-
-    # optional string, input instance name
-    # defaults to a generated name if empty
-    name: gnmic-emitter-counters-direct
-
-    # string, NATS server address
-    # default: "localhost:4222"
-    address: nats:4222
-
-    # string, name of the JetStream stream to consume from
-    stream: counters-stream-direct
-
-    # list of subject filters within the stream to consume from
-    subjects: []
-
-    # enum string, format of consumed message: "event" or "proto"
-    # default: "event"
-    format: event
-
-    # enum string, delivery policy for JetStream:
-    # one of: all, last, new, last-per-subject
-    # default: all
-    deliver-policy: new
-
-    # optional string, subject format used to extract metadata
-    # one of: static, subscription.target, target.subscription
-    # affects proto messages only
-    subject-format: subscription.target
-
-    # optional string, NATS username
-    # username: nats-user
-
-    # optional string, NATS password
-    # password: secret
-
-    # optional duration, reconnect wait time
-    # default: 2s
-    connect-time-wait: 3s
-
-    # optional bool, enables debug logging
-    debug: false
-
-    # integer, number of workers to start (parallel consumers)
-    # default: 1
-    num-workers: 1
-
-    # integer, internal per-worker buffer size
-    # default: 500
-    buffer-size: 1000
-
-    # integer, batch size when fetching messages from JetStream
-    # default: 500
-    fetch-batch-size: 500
-
-    # optional list of output names this input writes to
-    # outputs must be configured at the root `outputs:` section
-    outputs:
-      - prom-write
-
-    # optional list of event processors
-    # only applies when format is "event"
-    # event-processors:
-      # - add-tags
-
+    event-processors: []
 
 outputs:
   prom-write:
     type: prometheus_write
-
-    # url to push metrics towards, scheme is required
     url: http://prometheus:9090/api/v1/write
-
-    # a map of string:string,
-    # custom HTTP headers to be sent along with each remote write request.
-    # headers:
-      # header: value
-
-    # sets the `Authorization` header on every remote write request with the
-    # configured username and password.
-    # authentication:
-      # username:
-      # password:
-
-    # sets the `Authorization` header with type `.authorization.type` and the token value.
-    # authorization:
-      # type: Bearer
-      # credentials: <token string>
-
-    # tls config
-    # tls:
-      # string, path to the CA certificate file,
-      # this will be used to verify the clients certificates when `skip-verify` is false
-      # ca-file:
-      # string, client certificate file.
-      # cert-file:
-      # string, client key file.
-      # key-file:
-      # boolean, if true, the client will not verify the server
-      # certificate against the available certificate chain.
-      # skip-verify: false
-
-    # duration, defaults to 10s, time interval between write requests
     interval: 10s
-
-    # Buffer size for time series to be sent to the remote system.
-    # metrics are sent to the remote system every `.interval` or when the buffer is full. Whichever one is reached first.
-    # integer, defaults to 1000.
     buffer-size: 1000
-
-    # integer, defaults to 500, sets the maximum number of timeSeries per write request to remote.
     max-time-series-per-write: 500
-
-    # boolean, enables setting string type values as prometheus metric labels.
     strings-as-labels: true
-
-    # Push request timeout.
-    # duration, defaults to 10s
     timeout: 10s
-
-    # list of processors to apply on the message before writing
     event-processors: []
-
-    # an integer, sets the number of worker handling messages to be converted into Prometheus metrics
     num-workers: 1
-
-    # an integer, sets the number of writers draining the buffer and writing to Prometheus
     num-writers: 1
-
-    # debug mode
     debug: false
 
 api-server:
-  # string, in the form IP:port, the IP part can be omitted.
-  # if not set, it defaults to the value of `api` in the file main level.
-  # if `api` is not set, the default is `:7890`
   address: :7890
-  # duration, the server timeout.
-  # The set value is equally split between read and write timeouts
   timeout: 10s
-  # tls config
   # tls:
   #   # string, path to the CA certificate file,
   #   # this certificate is used to verify the clients certificates.
@@ -367,11 +76,6 @@ api-server:
   #   #
   #   # if no ca-file is present, `client-auth` defaults to ""`
   #   # if a ca-file is set, `client-auth` defaults to "require-verify"`
-    # client-auth: ""
-  # boolean, if true, the server will also handle the path /metrics and serve 
-  # gNMIc's enabled prometheus metrics.
   enable-metrics: true
-  # boolean, enables extra debug log printing
   debug: false
-  # boolean, disables creating log messages when accessing the `healthz` path
-  healthz-disable-logging: false
+  healthz-disable-logging: true

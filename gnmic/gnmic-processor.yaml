@@ -1,394 +1,136 @@
 log: true
 
 inputs:
-  nats-counters-raw-input:
-    # required string, type of input
+  nats-srl-in:
     type: jetstream
-
-    # optional string, input instance name
-    # defaults to a generated name if empty
-    name: gnmic-processor-counters
-
-    # string, NATS server address
-    # default: "localhost:4222"
+    name: gnmic-srl-preprocessor
     address: nats:4222
-
-    # string, name of the JetStream stream to consume from
-    stream: counters-stream-raw
-
-    # list of subject filters within the stream to consume from
+    stream: srl-ingress
     subjects: []
-
-    # enum string, format of consumed message: "event" or "proto"
-    # default: "event"
     format: event
-
-    # enum string, delivery policy for JetStream:
-    # one of: all, last, new, last-per-subject
-    # default: all
     deliver-policy: new
-
-    # optional string, subject format used to extract metadata
-    # one of: static, subscription.target, target.subscription
-    # affects proto messages only
     subject-format: subscription.target
-
-    # optional string, NATS username
-    # username: nats-user
-
-    # optional string, NATS password
-    # password: secret
-
-    # optional duration, reconnect wait time
-    # default: 2s
     connect-time-wait: 3s
-
-    # optional bool, enables debug logging
     debug: false
-
-    # integer, number of workers to start (parallel consumers)
-    # default: 1
     num-workers: 1
-
-    # integer, internal per-worker buffer size
-    # default: 500
     buffer-size: 1000
-
-    # integer, batch size when fetching messages from JetStream
-    # default: 500
     fetch-batch-size: 500
-
-    # optional list of output names this input writes to
-    # outputs must be configured at the root `outputs:` section
     outputs:
-      - nats-counters-processed-output
-
-    # optional list of event processors
-    # only applies when format is "event"
-    # event-processors:
-      # - add-tags
-
-  nats-states-raw-input:
-    # required string, type of input
-    type: jetstream
-
-    # optional string, input instance name
-    # defaults to a generated name if empty
-    name: gnmic-processor-states
-
-    # string, NATS server address
-    # default: "localhost:4222"
-    address: nats:4222
-
-    # string, name of the JetStream stream to consume from
-    stream: states-stream-raw
-
-    # list of subject filters within the stream to consume from
-    subjects: []
-
-    # enum string, format of consumed message: "event" or "proto"
-    # default: "event"
-    format: event
-
-    # enum string, delivery policy for JetStream:
-    # one of: all, last, new, last-per-subject
-    # default: all
-    deliver-policy: new
-
-    # optional string, subject format used to extract metadata
-    # one of: static, subscription.target, target.subscription
-    # affects proto messages only
-    subject-format: subscription.target
-
-    # optional string, NATS username
-    # username: nats-user
-
-    # optional string, NATS password
-    # password: secret
-
-    # optional duration, reconnect wait time
-    # default: 2s
-    connect-time-wait: 3s
-
-    # optional bool, enables debug logging
-    debug: false
-
-    # integer, number of workers to start (parallel consumers)
-    # default: 1
-    num-workers: 1
-
-    # integer, internal per-worker buffer size
-    # default: 500
-    buffer-size: 1000
-
-    # integer, batch size when fetching messages from JetStream
-    # default: 500
-    fetch-batch-size: 500
-
-    # optional list of output names this input writes to
-    # outputs must be configured at the root `outputs:` section
-    outputs:
-      - nats-states-processed-output
-
-    # optional list of event processors
-    # only applies when format is "event"
-    # event-processors:
-      # - add-tags
-
-outputs:
-  nats-counters-processed-output:
-    # required
-    type: jetstream
-    # NATS publisher name
-    # if left empty, this field is populated with the output name used as output ID (output1 in this example).
-    # If the flag --instance-name is not empty, the full name will be '$(instance-name)-$(name).
-    # note that each jetstream worker (publisher) will get a client name=$name-$index
-    name: gnmic-processed-counters
-    # Comma separated NATS servers
-    address: nats:4222
-    # string, stream name to write update to,
-    # if `create-stream` is set, it will be created
-    # # may not contain spaces, tabs, period (.), greater than (>) or asterisk (*)
-    stream: counters-stream-processed
-    # defines stream parameters that gNMIc will create on the target jetstream server(s)
-    create-stream:
-      # string, stream description
-      description: telemetry counters post pipeline processing
-      # string list, list of subjects allowed on the stream
-      # defaults to `.create-stream.$name.>`
-      subjects: []
-      # string, one of `memory`, `file`.
-      # defines the storage type to use for the stream.
-      # defaults to `memory`
-      storage: file
-      # int64, max number of messages in the stream.
-      max-msgs: 2000000
-      # int64, max bytes the stream may contain.
-      # max-bytes:
-      # duration, max age of any message in the stream.
-      # max-age:
-      # int32, maximum message size
-      # max-msg-size:
-    # string, one of `static`, `subscription.target`, `subscription.target.path`
-    # or `subscription.target.pathKeys`.
-    # Defines the subject format.
-    # `static`:
-    #       all updates will be written to the subject name set under `outputs.$output_name.subject`
-    # `subscription.target`:
-    #       updates from each subscription, target will be written
-    #       to subject $subscription_name.$target_name
-    # `subscription.target.path`:
-    #       updates from a certain subscription, target and path
-    #       will be written to subject $subscription_name.$target_name.$path.
-    #       The path is built by joining the gNMI path pathElements with a dot (.).
-    #       e.g: /interface[name=ethernet-1/1]/statistics/in-octets
-    #       -->  interface.statistics.in-octets
-    # `subscription.target.pathKeys`:
-    #       updates from a certain subscription, a certain target and a certain path
-    #       will be written to subject $subscription_name.$target_name.$path.
-    #       The path is built by joining the gNMI path pathElements and Keys with a dot (.).
-    #       e.g: /interface[name=ethernet-1/1]/statistics/in-octets
-    #       -->  interface.{name=ethernet-1/1}.statistics.in-octets
-    # `target.subscription`:
-    #       updates from each subscription, target will be written with a prefix of the `subject`
-    #       to subject $subject.$target_name.$subscription_name if `subject` is present. If not,
-    #       it will write to $target_name.$subscription_name.
-    subject-format: subscription.target
-    # If a subject-format is `static`, gnmic will publish all subscriptions updates
-    # to a single subject configured under this field. Defaults to 'telemetry'
-    # If a subject-format is `target.subscription`, gnmic will publish subscripion
-    # updates prefixed with this subject.
-    # subject: telemetry
-    # tls config
-    # tls:
-    #   # string, path to the CA certificate file,
-    #   # this will be used to verify the clients certificates when `skip-verify` is false
-    #   ca-file:
-    #   # string, client certificate file.
-    #   cert-file:
-    #   # string, client key file.
-    #   key-file:
-    #   # boolean, if true, the client will not verify the server
-    #   # certificate against the available certificate chain.
-    #   skip-verify: false
-    # NATS username
-    # username:
-    # NATS password
-    # password:
-    # wait time before reconnection attempts
-    connect-time-wait: 2s
-    # Exported message format, one of: proto, prototext, protojson, json, event
-    format: event
-    # string, one of `overwrite`, `if-not-present`, ``
-    # This field allows populating/changing the value of Prefix.Target in the received message.
-    # if set to ``, nothing changes
-    # if set to `overwrite`, the target value is overwritten using the template configured under `target-template`
-    # if set to `if-not-present`, the target value is populated only if it is empty, still using the `target-template`
-    # add-target:
-    # string, a GoTemplate that allow for the customization of the target field in Prefix.Target.
-    # it applies only if the previous field `add-target` is not empty.
-    # if left empty, it defaults to:
-    # {{- if index . "subscription-target" -}}
-    # {{ index . "subscription-target" }}
-    # {{- else -}}
-    # {{ index . "source" | host }}
-    # {{- end -}}`
-    # which will set the target to the value configured under `subscription.$subscription-name.target` if any,
-    # otherwise it will set it to the target name stripped of the port number (if present)
-    # target-template:
-    # boolean, valid only if format is `event`.
-    # if true, arrays of events are split and marshaled as JSON objects instead of an array of dicts.
-    split-events: false
-    # string, a GoTemplate that is executed using the received gNMI message as input.
-    # the template execution is the last step before the data is written to the file.
-    # First the received message is formatted according to the `format` field above, then the `event-processors` are applied if any
-    # then finally the msg-template is executed.
-    # msg-template:
-    # boolean, if true the message timestamp is changed to current time
-    override-timestamps: false
-    # integer, number of nats publishers to be created
-    num-workers: 1
-    # duration after which a message waiting to be handled by a worker gets discarded
-    write-timeout: 5s
-    # boolean, enables extra logging for the nats output
-    debug: false
-    # integer, sets the size of the local buffer where received
-    # NATS messages are stored before being sent to outputs.
-    # This value is set per worker. Defaults to 0 messages
-    buffer-size: 0
-    # boolean, enables the collection and export (via prometheus) of output specific metrics
-    enable-metrics: true
-    # list of processors to apply to the message before writing
-    event-processors: []
-
-  nats-states-processed-output:
-    # required
-    type: jetstream
-    # NATS publisher name
-    # if left empty, this field is populated with the output name used as output ID (output1 in this example).
-    # If the flag --instance-name is not empty, the full name will be '$(instance-name)-$(name).
-    # note that each jetstream worker (publisher) will get a client name=$name-$index
-    name: gnmic-processed-states
-    # Comma separated NATS servers
-    address: nats:4222
-    # string, stream name to write update to,
-    # if `create-stream` is set, it will be created
-    # # may not contain spaces, tabs, period (.), greater than (>) or asterisk (*)
-    stream: states-stream-processed
-    # defines stream parameters that gNMIc will create on the target jetstream server(s)
-    create-stream:
-      # string, stream description
-      description: telemetry states post pipeline processing
-      # string list, list of subjects allowed on the stream
-      # defaults to `.create-stream.$name.>`
-      subjects: []
-      # string, one of `memory`, `file`.
-      # defines the storage type to use for the stream.
-      # defaults to `memory`
-      storage: file
-      # int64, max number of messages in the stream.
-      max-msgs: 2000000
-      # int64, max bytes the stream may contain.
-      # max-bytes:
-      # duration, max age of any message in the stream.
-      # max-age:
-      # int32, maximum message size
-      # max-msg-size:
-    # string, one of `static`, `subscription.target`, `subscription.target.path`
-    # or `subscription.target.pathKeys`.
-    # Defines the subject format.
-    # `static`:
-    #       all updates will be written to the subject name set under `outputs.$output_name.subject`
-    # `subscription.target`:
-    #       updates from each subscription, target will be written
-    #       to subject $subscription_name.$target_name
-    # `subscription.target.path`:
-    #       updates from a certain subscription, target and path
-    #       will be written to subject $subscription_name.$target_name.$path.
-    #       The path is built by joining the gNMI path pathElements with a dot (.).
-    #       e.g: /interface[name=ethernet-1/1]/statistics/in-octets
-    #       -->  interface.statistics.in-octets
-    # `subscription.target.pathKeys`:
-    #       updates from a certain subscription, a certain target and a certain path
-    #       will be written to subject $subscription_name.$target_name.$path.
-    #       The path is built by joining the gNMI path pathElements and Keys with a dot (.).
-    #       e.g: /interface[name=ethernet-1/1]/statistics/in-octets
-    #       -->  interface.{name=ethernet-1/1}.statistics.in-octets
-    # `target.subscription`:
-    #       updates from each subscription, target will be written with a prefix of the `subject`
-    #       to subject $subject.$target_name.$subscription_name if `subject` is present. If not,
-    #       it will write to $target_name.$subscription_name.
-    subject-format: subscription.target
-    # If a subject-format is `static`, gnmic will publish all subscriptions updates
-    # to a single subject configured under this field. Defaults to 'telemetry'
-    # If a subject-format is `target.subscription`, gnmic will publish subscripion
-    # updates prefixed with this subject.
-    # subject: telemetry
-    # tls config
-    # tls:
-    #   # string, path to the CA certificate file,
-    #   # this will be used to verify the clients certificates when `skip-verify` is false
-    #   ca-file:
-    #   # string, client certificate file.
-    #   cert-file:
-    #   # string, client key file.
-    #   key-file:
-    #   # boolean, if true, the client will not verify the server
-    #   # certificate against the available certificate chain.
-    #   skip-verify: false
-    # NATS username
-    # username:
-    # NATS password
-    # password:
-    # wait time before reconnection attempts
-    connect-time-wait: 2s
-    # Exported message format, one of: proto, prototext, protojson, json, event
-    format: event
-    # string, one of `overwrite`, `if-not-present`, ``
-    # This field allows populating/changing the value of Prefix.Target in the received message.
-    # if set to ``, nothing changes
-    # if set to `overwrite`, the target value is overwritten using the template configured under `target-template`
-    # if set to `if-not-present`, the target value is populated only if it is empty, still using the `target-template`
-    # add-target:
-    # string, a GoTemplate that allow for the customization of the target field in Prefix.Target.
-    # it applies only if the previous field `add-target` is not empty.
-    # if left empty, it defaults to:
-    # {{- if index . "subscription-target" -}}
-    # {{ index . "subscription-target" }}
-    # {{- else -}}
-    # {{ index . "source" | host }}
-    # {{- end -}}`
-    # which will set the target to the value configured under `subscription.$subscription-name.target` if any,
-    # otherwise it will set it to the target name stripped of the port number (if present)
-    # target-template:
-    # boolean, valid only if format is `event`.
-    # if true, arrays of events are split and marshaled as JSON objects instead of an array of dicts.
-    split-events: false
-    # string, a GoTemplate that is executed using the received gNMI message as input.
-    # the template execution is the last step before the data is written to the file.
-    # First the received message is formatted according to the `format` field above, then the `event-processors` are applied if any
-    # then finally the msg-template is executed.
-    # msg-template:
-    # boolean, if true the message timestamp is changed to current time
-    override-timestamps: false
-    # integer, number of nats publishers to be created
-    num-workers: 1
-    # duration after which a message waiting to be handled by a worker gets discarded
-    write-timeout: 5s
-    # boolean, enables extra logging for the nats output
-    debug: false
-    # integer, sets the size of the local buffer where received
-    # NATS messages are stored before being sent to outputs.
-    # This value is set per worker. Defaults to 0 messages
-    buffer-size: 0
-    # boolean, enables the collection and export (via prometheus) of output specific metrics
-    enable-metrics: true
-    # list of processors to apply to the message before writing
+      - nats-srl-processed
     event-processors:
-      - arista-up-down-map
+      - thing
+
+  nats-eos-in:
+    type: jetstream
+    name: gnmic-eos-preprocessor
+    address: nats:4222
+    stream: eos-ingress
+    subjects: []
+    format: event
+    deliver-policy: new
+    subject-format: subscription.target
+    connect-time-wait: 3s
+    debug: false
+    num-workers: 1
+    buffer-size: 1000
+    fetch-batch-size: 500
+    outputs:
+      - nats-eos-processed
+    event-processors:
+      - thing
+      
+ 
+outputs:
+  nats-srl-out:
+    type: jetstream
+    name: gnmic-srl-postprocessor
+    address: nats:4222
+    stream: srl-egress
+    create-stream:
+      description: srl telemetry data post processing
+      subjects: []
+      storage: file
+      max-msgs: 2000000
+      # max-bytes:
+      # max-age:
+      # max-msg-size:
+    subject-format: subscription.target
+    # tls:
+    #   # string, path to the CA certificate file,
+    #   # this will be used to verify the clients certificates when `skip-verify` is false
+    #   ca-file:
+    #   # string, client certificate file.
+    #   cert-file:
+    #   # string, client key file.
+    #   key-file:
+    #   # boolean, if true, the client will not verify the server
+    #   # certificate against the available certificate chain.
+    #   skip-verify: false
+    connect-time-wait: 2s
+    format: event
+    split-events: false
+    override-timestamps: false
+    num-workers: 1
+    write-timeout: 5s
+    debug: false
+    buffer-size: 0
+    enable-metrics: true
+    event-processors:
+      - srl-up-down-map
+
+  nats-eos-out:
+    type: jetstream
+    name: gnmic-eos-postprocessor
+    address: nats:4222
+    stream: eos-egress
+    create-stream:
+      description: eos telemetry data post processing
+      subjects: []
+      storage: file
+      max-msgs: 2000000
+      # max-bytes:
+      # max-age:
+      # max-msg-size:
+    subject-format: subscription.target
+    # tls:
+    #   # string, path to the CA certificate file,
+    #   # this will be used to verify the clients certificates when `skip-verify` is false
+    #   ca-file:
+    #   # string, client certificate file.
+    #   cert-file:
+    #   # string, client key file.
+    #   key-file:
+    #   # boolean, if true, the client will not verify the server
+    #   # certificate against the available certificate chain.
+    #   skip-verify: false
+    connect-time-wait: 2s
+    format: event
+    split-events: false
+    override-timestamps: false
+    num-workers: 1
+    write-timeout: 5s
+    debug: false
+    buffer-size: 0
+    enable-metrics: true
+    event-processors:
+      - eos-up-down-map
 
 processors:
-  arista-up-down-map:
+  # srl
+  srl-up-down-map:
+    event-strings:
+      value-names:
+        - "oper-state"
+      transforms:
+        - replace:
+            apply-on: "value"
+            old: "UP"
+            new: "1"
+        - replace:
+            apply-on: "value"
+            old: "DOWN"
+  # eos          
+  eos-up-down-map:
     event-strings:
       value-names:
         - oper-status
@@ -412,14 +154,8 @@ processors:
             new: "0"
 
 api-server:
-  # string, in the form IP:port, the IP part can be omitted.
-  # if not set, it defaults to the value of `api` in the file main level.
-  # if `api` is not set, the default is `:7890`
   address: :7890
-  # duration, the server timeout.
-  # The set value is equally split between read and write timeouts
   timeout: 10s
-  # tls config
   # tls:
   #   # string, path to the CA certificate file,
   #   # this certificate is used to verify the clients certificates.
@@ -441,11 +177,6 @@ api-server:
   #   #
   #   # if no ca-file is present, `client-auth` defaults to ""`
   #   # if a ca-file is set, `client-auth` defaults to "require-verify"`
-    # client-auth: ""
-  # boolean, if true, the server will also handle the path /metrics and serve 
-  # gNMIc's enabled prometheus metrics.
   enable-metrics: true
-  # boolean, enables extra debug log printing
   debug: false
-  # boolean, disables creating log messages when accessing the `healthz` path
-  healthz-disable-logging: false
+  healthz-disable-logging: true
