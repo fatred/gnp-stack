@@ -8,7 +8,7 @@ inputs:
     address: nats:4222
     stream: srl-egress
     subjects:
-      - telemetry
+      - srl-egress.*
     format: event
     deliver-policy: new
     subject-format: subscription.target
@@ -26,7 +26,7 @@ inputs:
     address: nats:4222
     stream: eos-egress
     subjects:
-      - telemetry
+      - eos-egress.*
     format: event
     deliver-policy: new
     subject-format: subscription.target
