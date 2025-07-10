@@ -45,8 +45,9 @@ subscriptions:
       - /platform/control[slot=*]/cpu[index=all]/total
       - /platform/control[slot=*]/memory
   srl-if-states:
-    mode: on_change
-    heartbeat-interval: 60s
+    mode: stream
+    stream-mode: on_change
+    heartbeat-interval: 5s
     paths:
       - /interface[name=ethernet-1/*]/oper-state
   srl-if-stats:
@@ -76,16 +77,17 @@ subscriptions:
     paths:
       - /network-instance[name=*]/bridge-table/statistics/
   srl-apps:
-    paths:
-      - /system/app-management/application[name=*]
     mode: stream
     stream-mode: sample
     sample-interval: 5s
+    paths:
+      - /system/app-management/application[name=*]
   srl-net-instance:
+    mode: stream
+    stream-mode: on_change
+    heartbeat-interval: 5s
     paths:
       - /network-instance[name=*]/oper-state
-    mode: on_change
-    heartbeat-interval: 5s
 
   # eos
   eos-if-stats:
