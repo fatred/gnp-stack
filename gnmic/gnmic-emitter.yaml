@@ -18,7 +18,6 @@ inputs:
     fetch-batch-size: 500
     outputs:
       - prom-write
-    event-processors: []
 
   nats-eos:
     type: jetstream
@@ -36,7 +35,6 @@ inputs:
     fetch-batch-size: 500
     outputs:
       - prom-write
-    event-processors: []
 
 outputs:
   prom-write:
