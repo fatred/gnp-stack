@@ -7,8 +7,7 @@ inputs:
     name: gnmic-srl-emitter
     address: nats:4222
     stream: srl-egress
-    subjects:
-      - srl-egress.*
+    subjects: []
     format: event
     deliver-policy: new
     subject-format: subscription.target
@@ -25,8 +24,7 @@ inputs:
     name: gnmic-eos-emitter
     address: nats:4222
     stream: eos-egress
-    subjects:
-      - eos-egress.*
+    subjects: []
     format: event
     deliver-policy: new
     subject-format: subscription.target

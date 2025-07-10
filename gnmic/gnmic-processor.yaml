@@ -6,8 +6,7 @@ inputs:
     name: gnmic-srl-preprocessor
     address: nats:4222
     stream: srl-ingress
-    subjects:
-      - srl-ingress.*
+    subjects: []
     format: event
     deliver-policy: new
     subject-format: subscription.target
@@ -24,8 +23,7 @@ inputs:
     name: gnmic-eos-preprocessor
     address: nats:4222
     stream: eos-ingress
-    subjects:
-      - eos-ingress.*
+    subjects: []
     format: event
     deliver-policy: new
     subject-format: subscription.target
