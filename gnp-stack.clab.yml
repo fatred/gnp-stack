@@ -88,8 +88,8 @@ topology:
         - 3000:3000
 
   links:
-    - endpoints: ["leaf1:e1-1", "spine1:e1-1"] # leaf to spine
-    - endpoints: ["leaf2:e1-1", "spine1:e1-2"] # leaf to spine
+    - endpoints: ["leaf1:e1-49", "spine1:e1-1"] # leaf to spine
+    - endpoints: ["leaf2:e1-49", "spine1:e1-2"] # leaf to spine
     - endpoints: ["edge1:eth1", "edge2:eth1"] # edge to edge
-    - endpoints: ["leaf1:ethernet-1/2", "edge1:eth2"] # leaf to edge
-    - endpoints: ["leaf2:ethernet-1/2", "edge2:eth2"] # leaf to edge
+    - endpoints: ["leaf1:ethernet-1/1", "edge1:eth2"] # leaf to edge
+    - endpoints: ["leaf2:ethernet-1/1", "edge2:eth2"] # leaf to edge
