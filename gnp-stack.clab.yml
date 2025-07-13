@@ -9,6 +9,8 @@ topology:
       image: ghcr.io/nokia/srlinux
     arista_ceos:
       image: ceos:4.33.4M
+    linux:
+      image: ghcr.io/srl-labs/network-multitool
 
   nodes:
     spine1:
@@ -23,6 +25,16 @@ topology:
     edge2:
       kind: arista_ceos
       startup-config: uat-configs/arista-edge2.conf
+    client1:
+      kind: linux
+      exec:
+        - ip address add 192.168.1.2/24 dev eth1
+        - ip route add 192.168.2.0/24 via 192.168.1.1
+    client2:
+      kind: linux
+      exec:
+        - ip address add 192.168.2.2/24 dev eth1
+        - ip route add 192.168.1.0/24 via 192.168.2.1
 
     gnmic-ingestor:
       kind: linux
@@ -91,5 +103,10 @@ topology:
     - endpoints: ["leaf1:e1-49", "spine1:e1-1"] # leaf to spine
     - endpoints: ["leaf2:e1-49", "spine1:e1-2"] # leaf to spine
     - endpoints: ["edge1:eth1", "edge2:eth1"] # edge to edge
-    - endpoints: ["leaf1:ethernet-1/1", "edge1:eth2"] # leaf to edge
-    - endpoints: ["leaf2:ethernet-1/1", "edge2:eth2"] # leaf to edge
+    - endpoints: ["leaf1:ethernet-1/55", "edge1:eth2"] # leaf to edge
+    - endpoints: ["leaf2:ethernet-1/55", "edge2:eth2"] # leaf to edge
+    - endpoints: ["leaf1:ethernet-1/1", "client1:eth1"] # leaf to client1 (L3)
+    - endpoints: ["leaf2:ethernet-1/1", "client2:eth1"] # leaf to client2 (L3)
+    - endpoints: ["leaf1:ethernet-1/2", "client3:eth1"] # leaf to client3 (L2)
+    - endpoints: ["leaf2:ethernet-1/2", "client4:eth1"] # leaf to client4 (L2)
+    
