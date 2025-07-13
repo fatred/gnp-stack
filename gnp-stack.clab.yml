@@ -15,10 +15,13 @@ topology:
   nodes:
     spine1:
       kind: nokia_srlinux
+      startup-config: uat-configs/srl-spine1.conf
     leaf1:
       kind: nokia_srlinux
+      startup-config: uat-configs/srl-leaf1.conf
     leaf2:
       kind: nokia_srlinux
+      startup-config: uat-configs/srl-leaf1.conf
     edge1:
       kind: arista_ceos
       startup-config: uat-configs/arista-edge1.conf
