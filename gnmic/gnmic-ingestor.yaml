@@ -135,7 +135,7 @@ outputs:
       description: srl telemetry data to be processed mid pipeline
       subjects: []
       storage: file
-      max-msgs: 2000000
+      max-msgs: 100000
       # max-bytes:
       # max-age:
       # max-msg-size:
@@ -171,7 +171,7 @@ outputs:
       description: eos telemetry data to be processed mid pipeline
       subjects: []
       storage: file
-      max-msgs: 2000000
+      max-msgs: 100000
       # max-bytes:
       # max-age:
       # max-msg-size:
