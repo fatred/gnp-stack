@@ -93,6 +93,13 @@ topology:
         - ./nats/datastore:/data
       cmd: '-c /nats-server.conf'
 
+    nats-exporter:
+      kind: linux
+      image: natsio/prometheus-nats-exporter:latest
+      ports:
+        - "7777:7777"
+      cmd: '-varz -jsz=all http://nats:8222'
+
     prometheus:
       kind: linux
       image: prom/prometheus:latest
