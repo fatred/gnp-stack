@@ -12,7 +12,7 @@ scrape_configs:
     static_configs:
       - targets:
         - clab-gnp-stack-gnmic-ingestor:7890
-        - clab-gnp-stack-gnmic-processor:7890
+        # - clab-gnp-stack-gnmic-processor:7890
         - clab-gnp-stack-gnmic-emitter:7890
   - job_name: nats
     static_configs:
