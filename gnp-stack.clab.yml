@@ -118,7 +118,7 @@ topology:
       kind: linux
       image: grafana/grafana:latest
       binds:
-        - grafana/provisioning/datasources.yaml:/etc/grafana/provisioning/datasources/datasource.yaml:ro
+        - grafana/provisioning/datasource.yaml:/etc/grafana/provisioning/datasources/datasources.yaml:ro
         - grafana/provisioning/dashboards.yaml:/etc/grafana/provisioning/dashboard/default.yaml:ro
         - grafana/dashboards/:/var/lib/grafana/dashboards/:ro
       ports:
