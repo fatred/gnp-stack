@@ -36,7 +36,7 @@ subscriptions:
   srl-system-performance:
     mode: stream
     stream-mode: sample
-    sample-interval: 5s
+    sample-interval: 15s
     paths:
       - /platform/control[slot=*]/cpu[index=all]/total
       - /platform/control[slot=*]/memory
@@ -45,7 +45,7 @@ subscriptions:
   srl-if-states:
     mode: stream
     stream-mode: on_change
-    heartbeat-interval: 5s
+    heartbeat-interval: 15s
     paths:
       - /interface[name=ethernet-1/*]/oper-state
     outputs:
@@ -53,7 +53,7 @@ subscriptions:
   srl-if-stats:
     mode: stream
     stream-mode: sample
-    sample-interval: 5s
+    sample-interval: 15s
     paths:
       - /interface[name=ethernet-1/*]/statistics
       - /interface[name=ethernet-1/*]/traffic-rate
@@ -62,7 +62,7 @@ subscriptions:
   srl-routes:
     mode: stream
     stream-mode: sample
-    sample-interval: 5s
+    sample-interval: 15s
     paths:
       - /network-instance[name=*]/route-table/ipv4-unicast/statistics/
       - /network-instance[name=*]/route-table/ipv6-unicast/statistics/
@@ -71,7 +71,7 @@ subscriptions:
   srl-bgp:
     mode: stream
     stream-mode: sample
-    sample-interval: 5s
+    sample-interval: 15s
     paths:
       - /network-instance[name=*]/protocols/bgp/statistics
     outputs:
@@ -79,7 +79,7 @@ subscriptions:
   srl-bridge:
     mode: stream
     stream-mode: sample
-    sample-interval: 5s
+    sample-interval: 15s
     paths:
       - /network-instance[name=*]/bridge-table/statistics/
     outputs:
@@ -87,7 +87,7 @@ subscriptions:
   srl-apps:
     mode: stream
     stream-mode: sample
-    sample-interval: 5s
+    sample-interval: 15s
     paths:
       - /system/app-management/application[name=*]
     outputs:
@@ -95,7 +95,7 @@ subscriptions:
   srl-net-instance:
     mode: stream
     stream-mode: on_change
-    heartbeat-interval: 5s
+    heartbeat-interval: 15s
     paths:
       - /network-instance[name=*]/oper-state
     outputs:
@@ -105,7 +105,7 @@ subscriptions:
   eos-if-stats:
     mode: stream
     stream-mode: sample
-    sample-interval: 5s
+    sample-interval: 15s
     paths:
       - /interfaces/interface[name=*]/state/counters
     outputs:
