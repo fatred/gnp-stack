@@ -6,7 +6,7 @@ mgmt:
 topology:
   kinds:
     nokia_srlinux:
-      image: ghcr.io/nokia/srlinux
+      image: ghcr.io/nokia/srlinux:24.10.4
     arista_ceos:
       image: ceos:4.33.4M
     linux:
