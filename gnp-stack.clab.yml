@@ -119,7 +119,7 @@ topology:
       image: grafana/grafana:latest
       binds:
         - grafana/provisioning/datasource.yaml:/etc/grafana/provisioning/datasources/datasources.yaml:ro
-        - grafana/provisioning/dashboards.yaml:/etc/grafana/provisioning/dashboard/default.yaml:ro
+        - grafana/provisioning/dashboards.yaml:/etc/grafana/provisioning/dashboards/default.yaml:ro
         - grafana/dashboards/:/var/lib/grafana/dashboards/:ro
       ports:
         - 3000:3000
