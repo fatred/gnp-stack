@@ -123,6 +123,17 @@ topology:
         - grafana/dashboards/:/var/lib/grafana/dashboards/:ro
       ports:
         - 3000:3000
+    
+    gobmp:
+      kind: linux
+      image: sbezverk/gobmp:latest
+      ports:
+        - 5000:5000
+      cmd: |
+        -dump=nats 
+        -nats-server="nats://nats:4222" 
+        -source-port 5000
+
 
   links:
     - endpoints: ["leaf1:e1-49", "spine1:e1-1"] # leaf to spine
