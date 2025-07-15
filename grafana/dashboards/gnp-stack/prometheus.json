@@ -62,7 +62,7 @@
   "fiscalYearStartMonth": 0,
   "gnetId": 19105,
   "graphTooltip": 1,
-  "id": 2,
+  "id": 3,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -105,7 +105,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "orange",
+                "color": "blue",
                 "value": null
               }
             ]
@@ -144,7 +144,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "prometheus_build_info{pod=~\"$pod\", cluster=~\"$cluster\"}",
+          "expr": "prometheus_build_info{instance=~\"$instance\"}",
           "instant": true,
           "interval": "",
           "legendFormat": "{{ version }}",
@@ -162,17 +162,35 @@
       },
       "fieldConfig": {
         "defaults": {
-          "mappings": [],
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "Down"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "Up"
+                }
+              },
+              "type": "value"
+            }
+          ],
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "purple",
                 "value": null
               },
               {
                 "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
                 "value": 1
               }
             ]
@@ -211,7 +229,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "up{pod=~\"$pod\", cluster=~\"$cluster\"} < 1",
+          "expr": "up{job=\"prometheus\", instance=~\"$instance\"}",
           "instant": true,
           "interval": "",
           "legendFormat": "__auto",
@@ -219,7 +237,7 @@
           "refId": "A"
         }
       ],
-      "title": "Instance Down",
+      "title": "Instance status",
       "type": "stat"
     },
     {
@@ -271,7 +289,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "sum(prometheus_tsdb_head_series{pod=~\"$pod\", cluster=~\"$cluster\"}) by (pod)",
+          "expr": "sum(prometheus_tsdb_head_series{instance=~\"$instance\"}) by (instance)",
           "interval": "",
           "legendFormat": "__auto",
           "range": true,
@@ -294,7 +312,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "blue",
+                "color": "purple",
                 "value": null
               }
             ]
@@ -333,7 +351,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum(prometheus_sd_discovered_targets{pod=~\"$pod\", cluster=~\"$cluster\"}) by (pod)",
+          "expr": "sum(prometheus_sd_discovered_targets{instance=~\"$instance\"}) by (instance)",
           "instant": true,
           "interval": "",
           "legendFormat": "__auto",
@@ -341,7 +359,7 @@
           "refId": "A"
         }
       ],
-      "title": "Discovered Targets",
+      "title": "Active Targets",
       "type": "stat"
     },
     {
@@ -420,6 +438,10 @@
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
           },
@@ -433,7 +455,7 @@
         "x": 0,
         "y": 6
       },
-      "id": 93,
+      "id": 74,
       "options": {
         "legend": {
           "calcs": [
@@ -459,14 +481,62 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "up{pod=~\"$pod\", cluster=~\"$cluster\"}",
+          "expr": "sum(rate(prometheus_target_scrapes_exceeded_body_size_limit_total{job=\"prometheus\"}[$__rate_interval]))",
           "interval": "",
-          "legendFormat": "{{ pod }}",
+          "legendFormat": "{{ pod }} - Exceeded body size limit",
           "range": true,
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(prometheus_target_scrapes_exceeded_sample_limit_total{job=\"prometheus\"}[$__rate_interval]))",
+          "hide": false,
+          "legendFormat": "{{ pod }} - Exceeded sample limit",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(prometheus_target_scrapes_sample_duplicate_timestamp_total{job=\"prometheus\"}[$__rate_interval]))",
+          "hide": false,
+          "legendFormat": "{{ pod }} - Duplicate timestamp",
+          "range": true,
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(prometheus_target_scrapes_sample_out_of_bounds_total{job=\"prometheus\"}[$__rate_interval]))",
+          "hide": false,
+          "legendFormat": "{{ pod }} - Sample out of bounds",
+          "range": true,
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(prometheus_target_scrapes_sample_out_of_order_total{job=\"prometheus\"}[$__rate_interval]))",
+          "hide": false,
+          "legendFormat": "{{ pod }} - Sample out of order",
+          "range": true,
+          "refId": "E"
         }
       ],
-      "title": "Liveness by pod",
+      "title": "Target Scrapes Errors by pod",
       "type": "timeseries"
     },
     {
@@ -558,7 +628,7 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "sum(prometheus_config_last_reload_successful{pod=~\"$pod\", cluster=~\"$cluster\"}) by (pod)",
+          "expr": "sum(prometheus_config_last_reload_successful{job=\"prometheus\"})",
           "interval": "",
           "legendFormat": "{{ pod }}",
           "range": true,
@@ -625,7 +695,7 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "ms"
         },
         "overrides": []
       },
@@ -635,7 +705,7 @@
         "x": 0,
         "y": 14
       },
-      "id": 74,
+      "id": 75,
       "options": {
         "legend": {
           "calcs": [
@@ -661,62 +731,14 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "sum(rate(prometheus_target_scrapes_exceeded_body_size_limit_total{pod=~\"$pod\", cluster=~\"$cluster\"}[$__rate_interval])) by (pod)",
+          "expr": "sum(rate(prometheus_target_sync_length_seconds_sum{job=\"prometheus\"}[$__rate_interval])) by (instance, scrape_job) * 1000",
           "interval": "",
-          "legendFormat": "{{ pod }} - Exceeded body size limit",
+          "legendFormat": "{{ pod }} - {{ scrape_job }}",
           "range": true,
           "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "editorMode": "code",
-          "expr": "sum(rate(prometheus_target_scrapes_exceeded_sample_limit_total{pod=~\"$pod\", cluster=~\"$cluster\"}[$__rate_interval])) by (pod)",
-          "hide": false,
-          "legendFormat": "{{ pod }} - Exceeded sample limit",
-          "range": true,
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "editorMode": "code",
-          "expr": "sum(rate(prometheus_target_scrapes_sample_duplicate_timestamp_total{pod=~\"$pod\", cluster=~\"$cluster\"}[$__rate_interval])) by (pod)",
-          "hide": false,
-          "legendFormat": "{{ pod }} - Duplicate timestamp",
-          "range": true,
-          "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "editorMode": "code",
-          "expr": "sum(rate(prometheus_target_scrapes_sample_out_of_bounds_total{pod=~\"$pod\", cluster=~\"$cluster\"}[$__rate_interval])) by (pod)",
-          "hide": false,
-          "legendFormat": "{{ pod }} - Sample out of bounds",
-          "range": true,
-          "refId": "D"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "editorMode": "code",
-          "expr": "sum(rate(prometheus_target_scrapes_sample_out_of_order_total{pod=~\"$pod\", cluster=~\"$cluster\"}[$__rate_interval])) by (pod)",
-          "hide": false,
-          "legendFormat": "{{ pod }} - Sample out of order",
-          "range": true,
-          "refId": "E"
         }
       ],
-      "title": "Target Scrapes Errors by pod",
+      "title": "Target Sync by scrape_job",
       "type": "timeseries"
     },
     {
@@ -812,117 +834,14 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "sum(prometheus_sd_discovered_targets{pod=~\"$pod\", cluster=~\"$cluster\"}) by (pod)",
+          "expr": "sum(prometheus_sd_discovered_targets{job=\"prometheus\"})",
           "interval": "",
           "legendFormat": "{{ pod }}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Number of Targets by pod",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 25,
-            "gradientMode": "opacity",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "smooth",
-            "lineStyle": {
-              "fill": "solid"
-            },
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 22
-      },
-      "id": 75,
-      "options": {
-        "legend": {
-          "calcs": [
-            "min",
-            "max",
-            "mean"
-          ],
-          "displayMode": "list",
-          "placement": "right",
-          "showLegend": false
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "pluginVersion": "8.3.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "editorMode": "code",
-          "exemplar": true,
-          "expr": "sum(rate(prometheus_target_sync_length_seconds_sum{pod=~\"$pod\", cluster=~\"$cluster\"}[$__rate_interval])) by (pod, scrape_job) * 1000",
-          "interval": "",
-          "legendFormat": "{{ pod }} - {{ scrape_job }}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Target Sync by pod, scrape_job",
+      "title": "Number of Targets",
       "type": "timeseries"
     },
     {
@@ -1018,14 +937,14 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "round(sum(rate(prometheus_target_interval_length_seconds_sum{pod=~\"$pod\", cluster=~\"$cluster\"}[$__rate_interval]) / rate(prometheus_target_interval_length_seconds_count{pod=~\"$pod\", cluster=~\"$cluster\"}[$__rate_interval])) by (pod))",
+          "expr": "round(sum(rate(prometheus_target_interval_length_seconds_sum{job=\"prometheus\"}[$__rate_interval]) / rate(prometheus_target_interval_length_seconds_count{job=\"prometheus\"}[$__rate_interval])))",
           "interval": "",
           "legendFormat": "{{ pod }}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Average Scrape Interval by pod",
+      "title": "Average Scrape Interval",
       "type": "timeseries"
     },
     {
@@ -1102,7 +1021,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1216,7 +1136,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1318,7 +1239,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1420,7 +1342,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1558,7 +1481,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1660,7 +1584,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1774,7 +1699,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1876,7 +1802,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -3026,9 +2953,8 @@
         "name": "cluster",
         "options": [],
         "query": {
-          "qryType": 1,
           "query": "label_values(kube_node_info,cluster)",
-          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+          "refId": "StandardVariableQuery"
         },
         "refresh": 1,
         "regex": "",
@@ -3112,6 +3038,29 @@
         "queryValue": "",
         "skipUrlSync": false,
         "type": "custom"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "localhost:9090",
+          "value": "localhost:9090"
+        },
+        "definition": "label_values(up{job=\"prometheus\"},instance)",
+        "hide": 0,
+        "includeAll": false,
+        "label": "instance",
+        "multi": false,
+        "name": "instance",
+        "options": [],
+        "query": {
+          "query": "label_values(up{job=\"prometheus\"},instance)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
       }
     ]
   },
@@ -3122,7 +3071,7 @@
   "timepicker": {},
   "timezone": "",
   "title": "Prometheus",
-  "uid": "k8s_addons_prometheus",
-  "version": 5,
+  "uid": "gnp_prometheus",
+  "version": 3,
   "weekStart": ""
 }
