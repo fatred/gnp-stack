@@ -1,6 +1,11 @@
 -- Create database
 CREATE DATABASE IF NOT EXISTS bgp;
+
+CREATE USER IF NOT EXISTS bgp IDENTIFIED WITH plaintext_password BY 'bgp-password';
+GRANT SELECT ON bgp.* TO bgp;
+
 USE bgp;
+
 
 -- Main NATS consumer table for all BMP messages
 CREATE TABLE bgp_nats_queue (
