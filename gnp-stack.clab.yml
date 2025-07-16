@@ -127,7 +127,8 @@ topology:
     
     gobmp:
       kind: linux
-      image: sbezverk/gobmp:latest
+      # image: sbezverk/gobmp:latest
+      image: localhost/gobmp:nats-addstream # waiting for https://github.com/sbezverk/gobmp/pull/266
       ports:
         - 5000:5000
       cmd: |
