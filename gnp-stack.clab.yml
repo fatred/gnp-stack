@@ -121,6 +121,7 @@ topology:
         - grafana/provisioning/datasource.yaml:/etc/grafana/provisioning/datasources/datasources.yaml:ro
         - grafana/provisioning/dashboards.yaml:/etc/grafana/provisioning/dashboards/default.yaml:ro
         - grafana/dashboards/:/var/lib/grafana/dashboards/:ro
+        - grafana/plugins/:/var/lib/grafana/plugins/:ro
       ports:
         - 3000:3000
     
