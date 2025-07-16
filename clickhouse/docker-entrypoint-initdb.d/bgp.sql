@@ -420,31 +420,31 @@ SELECT
 FROM bgp_nats_queue
 WHERE subject IN ('gobmp.parsed.flowspec', 'gobmp.parsed.flowspec_v4', 'gobmp.parsed.flowspec_v6');
 
--- ====================
--- USEFUL VIEWS FOR ANALYSIS
--- ====================
+-- -- ====================
+-- -- USEFUL VIEWS FOR ANALYSIS
+-- -- ====================
 
--- Current BGP table (latest state of all prefixes)
-CREATE VIEW bgp_current_table AS
-SELECT *
-FROM bgp_unicast_prefixes
-WHERE (peer_ip, prefix) IN (
-    SELECT peer_ip, prefix
-    FROM bgp_unicast_prefixes
-    WHERE action != 'del'
-    GROUP BY peer_ip, prefix
-    HAVING timestamp = max(timestamp)
-);
+-- -- Current BGP table (latest state of all prefixes)
+-- CREATE VIEW bgp_current_table AS
+-- SELECT *
+-- FROM bgp_unicast_prefixes
+-- WHERE (peer_ip, prefix) IN (
+--     SELECT peer_ip, prefix
+--     FROM bgp_unicast_prefixes
+--     WHERE action != 'del'
+--     GROUP BY peer_ip, prefix
+--     HAVING timestamp = max(timestamp)
+-- );
 
--- Peer state summary
-CREATE VIEW bgp_peer_summary AS
-SELECT 
-    peer_ip,
-    peer_asn,
-    router_ip,
-    state,
-    count() as update_count,
-    max(timestamp) as last_update
-FROM bgp_peer_states
-GROUP BY peer_ip, peer_asn, router_ip, state
-ORDER BY last_update DESC;
+-- -- Peer state summary
+-- CREATE VIEW bgp_peer_summary AS
+-- SELECT 
+--     peer_ip,
+--     peer_asn,
+--     router_ip,
+--     state,
+--     count() as update_count,
+--     max(timestamp) as last_update
+-- FROM bgp_peer_states
+-- GROUP BY peer_ip, peer_asn, router_ip, state
+-- ORDER BY last_update DESC;
