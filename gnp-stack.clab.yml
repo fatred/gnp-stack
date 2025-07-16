@@ -133,6 +133,7 @@ topology:
         -dump=nats 
         -nats-server="nats://nats:4222" 
         -source-port 5000
+      mgmt-ipv4: 192.168.60.254
 
     clickhouse:
       kind: linux
