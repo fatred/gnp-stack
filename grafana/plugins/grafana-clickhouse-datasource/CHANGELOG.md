@@ -1,44 +1,5 @@
 # Changelog
 
-# 4.10.1
-
-### Fixes
-
-- Bump grafana/plugin-actions from ff169fa386880e34ca85a49414e5a0ff84c3f7ad to b788be6746403ff9bae26d5e800794f2a5620b4c (#1286)
-- Bump cspell from 9.0.2 to 9.1.1 (#1278)
-
-# 4.10.0
-
-### Features
-
-- Ad-hoc queries: Allow to filter by values inside the map (#1265)
-
-### Fixes 
-
-- Fix ad-hoc filter application with templated target tables (#1241)
-- Dependency updates
-
-# 4.9.1
-
-### Fixes
-
-- Error logging fix
-
-# 4.9.0
-
-### Features
-
-- Add support for the Grafana `row_limit` [configuration setting](https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/#row_limit).
-- Add support for kind, status, instrumentation library, links, events and state data for traces (#1043, #1208)
-- Cancel JSON paths query after 10s (#1206)
-- SQL Editor now suggests database, table, column, and function names while typing (#1204)
-- Add SQL Formatter button + shortcut for making long queries more readable in the editor (#1205)
-
-### Fixes
-
-- Fixed "run query" shortcut from running stale query (#1205)
-- Dependency updates
-
 ## 4.8.2
 
 ### Fixes
@@ -208,7 +169,7 @@
 - Fixed empty builder options when switching from SQL Editor back to Query Editor
 - Fix SQL Generator including "undefined" in `FROM` when database isn't defined
 - Allow adding spaces in multi filters (such as `WHERE .. IN`)
-- Fixed missing `AND` keyword when adding a filter to a Trace ID query
+- Fixed missing `AND` keyword when adding a filter to a Trace ID query 
 
 ## 4.0.2
 
@@ -258,12 +219,10 @@ Version 4.0.0 contains major revisions to the query builder and datasource confi
 - Added column hints, which offers better linking across query components when working with columns and filters. For example, a filter can be added for the `Time` column, even without knowing what the time column name is yet. This enables better SQL generation that is "aware" of a column's intended use.
 
 ### Plugin Backend
-
 - Added migration logic for `v3` configs going to `v4+`. This is applied when the config is loaded when building a database connection.
 - `$__timeFilter`, `$__fromTime`, and `$__toTime` macros now convert to `DateTime64(3)` for better server-side type conversion. Also enables millisecond precision time range filtering.
 
 #### Datasource Configuration
-
 - Added migration script for `v3.x` configurations to `v4+`. This runs automatically when opening/saving the datasource configuration.
 - Renamed config value `server` to `host`.
 - Renamed config value `timeout` to the more specific `dial_timeout`.

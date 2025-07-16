@@ -1,53 +1,57 @@
 {
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/developers/plugins/plugin.schema.json",
-  "type": "datasource",
-  "name": "ClickHouse",
-  "id": "grafana-clickhouse-datasource",
-  "metrics": true,
-  "backend": true,
-  "logs": true,
-  "tracing": true,
   "alerting": true,
   "annotations": true,
+  "backend": true,
+  "category": "sql",
+  "dependencies": {
+    "grafanaDependency": "\u003e=9.5.0",
+    "plugins": []
+  },
   "executable": "gpx_clickhouse",
+  "id": "grafana-clickhouse-datasource",
   "includes": [
     {
-      "type": "dashboard",
       "name": "Query Analysis",
-      "path": "dashboards/query-analysis.json"
+      "path": "dashboards/query-analysis.json",
+      "type": "dashboard"
     },
     {
-      "type": "dashboard",
       "name": "Data Analysis",
-      "path": "dashboards/data-analysis.json"
+      "path": "dashboards/data-analysis.json",
+      "type": "dashboard"
     },
     {
-      "type": "dashboard",
       "name": "Cluster Analysis",
-      "path": "dashboards/cluster-analysis.json"
+      "path": "dashboards/cluster-analysis.json",
+      "type": "dashboard"
     },
     {
-      "type": "dashboard",
       "name": "ClickHouse OTel Dashboard",
-      "path": "dashboards/opentelemetry-clickhouse.json"
+      "path": "dashboards/opentelemetry-clickhouse.json",
+      "type": "dashboard"
     },
     {
-      "type": "dashboard",
       "name": "ClickHouse System Dashboards",
-      "path": "dashboards/system-dashboards.json"
+      "path": "dashboards/system-dashboards.json",
+      "type": "dashboard"
     }
   ],
-  "category": "sql",
   "info": {
-    "description": "ClickHouse datasource plugin for Grafana",
     "author": {
       "name": "Grafana Labs"
     },
-    "keywords": ["Simple"],
-    "logos": {
-      "small": "img/logo.svg",
-      "large": "img/logo.svg"
+    "build": {
+      "time": 1740423645523,
+      "repo": "https://github.com/grafana/clickhouse-datasource",
+      "branch": "main",
+      "hash": "fc6df1696e0d2ccfe0bf3df51ef9d6df68662f09",
+      "build": 2811
     },
+    "description": "ClickHouse datasource plugin for Grafana",
+    "keywords": [
+      "Simple"
+    ],
     "links": [
       {
         "name": "Website",
@@ -58,12 +62,17 @@
         "url": "https://github.com/grafana/clickhouse-datasource/blob/master/LICENSE"
       }
     ],
+    "logos": {
+      "large": "img/logo.svg",
+      "small": "img/logo.svg"
+    },
     "screenshots": [],
-    "version": "4.10.1",
-    "updated": "2025-06-24"
+    "updated": "2025-02-24",
+    "version": "4.8.2"
   },
-  "dependencies": {
-    "grafanaDependency": ">=9.5.0",
-    "plugins": []
-  }
+  "logs": true,
+  "metrics": true,
+  "name": "ClickHouse",
+  "tracing": true,
+  "type": "datasource"
 }
