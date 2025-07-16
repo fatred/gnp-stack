@@ -30,10 +30,13 @@ datasources:
   - name: ClickHouse
     type: grafana-clickhouse-datasource
     jsonData:
-      defaultDatabase: bgp
-      port: 9000
       host: clickhouse
+      port: 9000
       username: bgp
-      tlsSkipVerify: false
+      protocol: native
+      secure: false
+      defaultDatabase: bgp
+      dialTimeout: 10
+      queryTimeout: 60
     secureJsonData:
       password: bgp-password
