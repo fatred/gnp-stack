@@ -18,3 +18,7 @@ scrape_configs:
     static_configs:
       - targets:
         - clab-gnp-stack-nats-exporter:7777
+  - job_name: clickhouse
+    static_configs:
+      - targets:
+        - clab-gnp-stack-clickhouse:9363
