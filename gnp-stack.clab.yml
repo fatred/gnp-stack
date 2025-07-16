@@ -147,6 +147,7 @@ topology:
         - clickhouse/data:/var/lib/clickhouse:rw
         - clickhouse/logs:/var/log/clickhouse-server:rw
         - clickhouse/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d/:ro
+        - clickhouse/users.d/:/etc/clickhouse-server/users.d/:ro
       cmd: |
         --name gnp-stack-clickhouse
         --ulimit nofile=262144:262144
