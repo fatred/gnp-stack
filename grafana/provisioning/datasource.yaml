@@ -27,3 +27,13 @@ datasources:
     isDefault: true
     version: 1
     editable: true
+  - name: ClickHouse
+    type: grafana-clickhouse-datasource
+    jsonData:
+      defaultDatabase: bgp
+      port: 9000
+      host: clickhouse
+      username: bgp
+      tlsSkipVerify: false
+    secureJsonData:
+      password: bgp-password
