@@ -1,0 +1,84 @@
+networks:
+  gnp-mgmt:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.60.0/24
+services:
+  # Troubleshooting container
+  # Uncomment to run it
+  # netshoot:
+  #   image: ghcr.io/nicolaka/netshoot:latest
+  #   networks:
+  #     - gnp-mgmt
+  #   command: "sleep 36000"
+  gnmic-ingestor:
+    image: ghcr.io/openconfig/gnmic:0.45.0
+    ports:
+      - 9804:9804
+    volumes:
+      - ./gnmic/gnmic-ingestor.yaml:/app/gnmic.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock # allows docker loader in gnmic config, only needed for demo containerlab networks
+    command: ["--config", "/app/gnmic.yaml", "--log", "subscribe"]
+    networks:
+      - gnp-mgmt
+
+  gnmic-emitter:
+    image: ghcr.io/openconfig/gnmic:0.45.0
+    ports:
+      - 9806:9804
+    volumes:
+      - ./gnmic/gnmic-emitter.yaml:/app/gnmic.yaml:ro
+    command: '--config /app/gnmic.yaml --log subscribe'
+    networks:
+      - gnp-mgmt
+
+  nats:
+    image: nats:latest
+    ports:
+      - "4222:4222"
+      - "6222:6222"
+      - "8222:8222"
+    volumes:
+      - ./nats/nats-server.conf:/nats-server.conf
+      - ./nats/datastore:/data
+    command: '-c /nats-server.conf'
+    networks:
+      - gnp-mgmt
+
+  nats-exporter:
+    image: natsio/prometheus-nats-exporter:latest
+    ports:
+      - "7777:7777"
+    command: '-varz -jsz=all http://nats:8222'
+    networks:
+      - gnp-mgmt
+
+  prometheus:
+    image: prom/prometheus:latest
+    #user: 65534:65534
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+    command: |
+      --config.file=/etc/prometheus/prometheus.yaml
+      --web.console.libraries=/usr/share/prometheus/console_libraries
+      --web.console.templates=/usr/share/prometheus/consoles
+      --web.enable-remote-write-receiver
+    networks:
+      - gnp-mgmt
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=grafana
+    volumes:
+      - ./grafana/provisioning/datasource.yaml:/etc/grafana/provisioning/datasources/datasources.yaml:ro
+      - ./grafana/provisioning/dashboards.yaml:/etc/grafana/provisioning/dashboards/default.yaml:ro
+      - ./grafana/dashboards/:/var/lib/grafana/dashboards/
+      - ./grafana/plugins/:/var/lib/grafana/plugins/
+    ports:
+      - 3000:3000
+    networks:
+      - gnp-mgmt

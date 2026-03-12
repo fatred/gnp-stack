@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: gnmic-emitter
+  name: gnmic-emitter
+  namespace: gnp-stack
+spec:
+  ports:
+    - name: api-server
+      port: 7890
+      targetPort: 7890
+  selector:
+    service: gnmic-emitter

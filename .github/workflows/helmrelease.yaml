@@ -1,0 +1,58 @@
+name: Release Charts
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release-repo:
+    permissions:
+      contents: write
+      packages: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - uses: azure/setup-helm@v4.3.0
+        with:
+          version: 3.19.1
+
+      - name: Add Helm dependency repositories
+        run: |
+          for dir in $(ls -d install/kubernetes/*/); do
+            helm dependency list $dir 2> /dev/null | tail +2 | head -n -1 | awk '{ print "helm repo add " $1 " " $3 }' | while read cmd; do $cmd; done
+          done
+
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.7.0
+        with:
+          charts_dir: install/kubernetes
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_SKIP_EXISTING: true
+
+      - name: Downcase repository owner for REGISTRY
+        run: |
+          echo "REGISTRY=ghcr.io/${GITHUB_REPOSITORY@L}" >> "${GITHUB_ENV}"
+
+      - name: Run oci-chart-releaser
+        uses: bitdeps/helm-oci-charts-releaser@v0.1.5
+        with:
+          charts_dir: install/kubernetes
+          oci_registry: ${{ env.REGISTRY }}
+          oci_username: ${{ github.actor }}
+          oci_password: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          skip_helm_install: true
+          skip_dependencies: true
+          skip_gh_release: true
+          skip_existing: false

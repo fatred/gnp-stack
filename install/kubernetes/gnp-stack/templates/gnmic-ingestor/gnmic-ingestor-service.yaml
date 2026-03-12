@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: gnmic-ingestor
+  name: gnmic-ingestor
+  namespace: gnp-stack
+spec:
+  ports:
+    - name: api-server
+      port: 7890
+      targetPort: 7890
+  selector:
+    service: gnmic-ingestor

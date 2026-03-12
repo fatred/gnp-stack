@@ -1,0 +1,16 @@
+To look at the status of the deployed components, you can use the following commands:
+
+  kubectl get pods -n {{ .Release.Namespace }}
+  kubectl get svc -n {{ .Release.Namespace }}
+
+Accessing Grafana:
+
+    1. Forward the Grafana service port to your local machine:
+
+         kubectl port-forward -n {{ .Release.Namespace }} svc/gnp-stack-grafana 3000:80
+
+    2. Open your web browser and navigate to http://localhost:3000
+
+    3. Log in using the default credentials:
+         - Username: admin
+         - Password: gnp-stack

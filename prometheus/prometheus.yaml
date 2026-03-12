@@ -6,11 +6,18 @@ scrape_configs:
     metrics_path: /metrics
     scheme: http
     static_configs:
-    - targets:
-      - localhost:9090
+      - targets:
+        - localhost:9090
   - job_name: gnmic
     static_configs:
       - targets:
-        - clab-gnp-stack-gnmic-ingestor:7890
-        - clab-gnp-stack-gnmic-processor:7890
-        - clab-gnp-stack-gnmic-emitter:7890
+        - gnmic-ingestor:7890
+        - gnmic-emitter:7890
+  - job_name: nats
+    static_configs:
+      - targets:
+        - nats-exporter:7777
+#  - job_name: clickhouse
+#    static_configs:
+#      - targets:
+#        - clab-gnp-stack-clickhouse:9363

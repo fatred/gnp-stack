@@ -1,0 +1,45 @@
+{{- with .Values.gnmic.emitter -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    service: gnmic-emitter
+  name: gnmic-emitter
+  namespace: gnp-stack
+spec:
+  replicas: {{ .replicas }}
+  selector:
+    matchLabels:
+      service: gnmic-emitter
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        service: gnmic-emitter
+    spec:
+      containers:
+        - args:
+            - --config
+            - /app/gnmic.yaml
+            - --log
+            - subscribe
+          image: ghcr.io/openconfig/gnmic:0.45.0
+          name: gnmic-emitter
+          ports:
+            - containerPort: 7890
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /app/gnmic.yaml
+              name: gnmic-emitter-cm0
+              readOnly: true
+              subPath: gnmic.yaml
+      restartPolicy: Always
+      volumes:
+        - configMap:
+            items:
+              - key: gnmic-emitter.yaml
+                path: gnmic.yaml
+            name: gnmic-emitter-cm0
+          name: gnmic-emitter-cm0
+{{- end -}}

@@ -1,12 +1,13 @@
 ---
 name: gnp-stack
 mgmt:
+  network: gnp-stack_gnp-mgmt
   ipv4-subnet: 192.168.60.0/24
 
 topology:
   kinds:
     nokia_srlinux:
-      image: ghcr.io/nokia/srlinux
+      image: ghcr.io/nokia/srlinux:24.10.4
     arista_ceos:
       image: ceos:4.33.4M
     linux:
@@ -53,69 +54,6 @@ topology:
         - ip route add 192.168.1.0/24 via 192.168.3.1
         - ip route add 192.168.2.0/24 via 192.168.3.1
 
-    gnmic-ingestor:
-      kind: linux
-      image: gnmic:0.41.1
-      ports:
-        - 9804:9804
-      binds:
-        - ./gnmic/gnmic-ingestor.yaml:/app/gnmic.yaml:ro
-        - /var/run/docker.sock:/var/run/docker.sock # allows docker loader in gnmic config
-      cmd: '--config /app/gnmic.yaml --log subscribe'
-
-    # gnmic-processor:
-    #   kind: linux
-    #   image: gnmic:0.41.1
-    #   ports:
-    #     - 9805:9804
-    #   binds:
-    #     - ./gnmic/gnmic-processor.yaml:/app/gnmic.yaml:ro
-    #   cmd: '--config /app/gnmic.yaml --log subscribe'
-
-    gnmic-emitter:
-      kind: linux
-      image: gnmic:0.41.1
-      ports:
-        - 9806:9804
-      binds:
-        - ./gnmic/gnmic-emitter.yaml:/app/gnmic.yaml:ro
-      cmd: '--config /app/gnmic.yaml --log subscribe'
-
-    nats:
-      kind: linux
-      image: nats:latest
-      ports:
-        - "4222:4222"
-        - "6222:6222"
-        - "8222:8222"
-      binds:
-        - ./nats/nats-server.conf:/nats-server.conf
-        - ./nats/datastore:/data
-      cmd: '-c /nats-server.conf'
-
-    prometheus:
-      kind: linux
-      image: prom/prometheus:latest
-      #user: 65534:65534
-      ports:
-        - 9090:9090
-      binds:
-        - ./prometheus/:/etc/prometheus/
-      cmd: |
-        --config.file=/etc/prometheus/prometheus.yaml
-        --web.console.libraries=/usr/share/prometheus/console_libraries
-        --web.console.templates=/usr/share/prometheus/consoles
-        --enable-feature=remote-write-receiver
-
-    grafana:
-      kind: linux
-      image: grafana/grafana:latest
-      binds:
-        - grafana/datasources/datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yaml:ro
-        #- grafana/dashboards/:/var/lib/grafana/dashboards
-      ports:
-        - 3000:3000
-
   links:
     - endpoints: ["leaf1:e1-49", "spine1:e1-1"] # leaf to spine
     - endpoints: ["leaf2:e1-49", "spine1:e1-2"] # leaf to spine
@@ -126,4 +64,3 @@ topology:
     - endpoints: ["leaf2:ethernet-1/1", "client2:eth1"] # leaf to client2 (L3)
     - endpoints: ["leaf1:ethernet-1/2", "client3:eth1"] # leaf to client3 (L2)
     - endpoints: ["leaf2:ethernet-1/2", "client4:eth1"] # leaf to client4 (L2)
-    

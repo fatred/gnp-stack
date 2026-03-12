@@ -1,0 +1,45 @@
+{{- with .Values.gnmic.ingestor -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    service: gnmic-ingestor
+  name: gnmic-ingestor
+  namespace: gnp-stack
+spec:
+  replicas: {{ .replicas }}
+  selector:
+    matchLabels:
+      service: gnmic-ingestor
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        service: gnmic-ingestor
+    spec:
+      containers:
+        - args:
+            - --config
+            - /app/gnmic.yaml
+            - --log
+            - subscribe
+          image: ghcr.io/openconfig/gnmic:0.45.0
+          name: gnmic-ingestor
+          ports:
+            - containerPort: 7890
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /app/gnmic.yaml
+              name: gnmic-ingestor-cm0
+              readOnly: true
+              subPath: gnmic.yaml
+      restartPolicy: Always
+      volumes:
+        - configMap:
+            items:
+              - key: gnmic-ingestor.yaml
+                path: gnmic.yaml
+            name: gnmic-ingestor-cm0
+          name: gnmic-ingestor-cm0
+{{- end -}}

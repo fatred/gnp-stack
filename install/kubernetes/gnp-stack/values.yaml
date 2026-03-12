@@ -1,0 +1,809 @@
+# Default values for gnp-stack.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Local Path Provisioner for persistent storage of Grafana and NATS JetStream
+localPathProvisioner:
+  enabled: true
+
+# gNMIc configuration
+gnmic:
+  enabled: true
+  # Config file for gnmic-ingestor
+  # For details see: https://gnmic.openconfig.net/user_guide/configuration_file/
+  ingestor:
+    replicas: 1
+    config: |
+      username: admin
+      log: true
+
+      targets:
+        192.168.60.11:
+          skip-verify: true
+          insecure: false
+          password: NokiaSrl1!
+          subscriptions:
+            - srl-if-states
+            - srl-if-stats
+            - srl-bgp
+            - srl-system-performance
+            - srl-routes
+            - srl-bridge
+            - srl-apps
+            - srl-net-instance
+
+      loader:
+        type: docker
+        filters:
+          - containers:
+              - label=clab-node-kind: nokia_srlinux
+            config:
+              skip-verify: true
+              insecure: false
+              password: NokiaSrl1!
+              subscriptions:
+                - srl-if-states
+                - srl-if-stats
+                - srl-bgp
+                - srl-system-performance
+                - srl-routes
+                - srl-bridge
+                - srl-apps
+                - srl-net-instance
+          - containers:
+              - label=clab-node-kind: arista_ceos
+            port: \"6030\"
+            config:
+              skip-verify: false
+              insecure: true
+              password: admin
+              subscriptions:
+                - eos-if-states
+                - eos-if-stats
+
+      subscriptions:
+        # srl
+        srl-system-performance:
+          mode: stream
+          stream-mode: sample
+          sample-interval: 15s
+          paths:
+            - /platform/control[slot=*]/cpu[index=all]/total
+            - /platform/control[slot=*]/memory
+          outputs:
+            - nats-srl-out
+        srl-if-states:
+          mode: stream
+          stream-mode: on_change
+          heartbeat-interval: 15s
+          paths:
+            - /interface[name=ethernet-1/*]/oper-state
+          outputs:
+            - nats-srl-out
+        srl-if-stats:
+          mode: stream
+          stream-mode: sample
+          sample-interval: 15s
+          paths:
+            - /interface[name=ethernet-1/*]/statistics
+            - /interface[name=ethernet-1/*]/traffic-rate
+          outputs:
+            - nats-srl-out
+        srl-routes:
+          mode: stream
+          stream-mode: sample
+          sample-interval: 15s
+          paths:
+            - /network-instance[name=*]/route-table/ipv4-unicast/statistics/
+            - /network-instance[name=*]/route-table/ipv6-unicast/statistics/
+          outputs:
+            - nats-srl-out
+        srl-bgp:
+          mode: stream
+          stream-mode: sample
+          sample-interval: 15s
+          paths:
+            - /network-instance[name=*]/protocols/bgp/statistics
+          outputs:
+            - nats-srl-out
+        srl-bridge:
+          mode: stream
+          stream-mode: sample
+          sample-interval: 15s
+          paths:
+            - /network-instance[name=*]/bridge-table/statistics/
+          outputs:
+            - nats-srl-out
+        srl-apps:
+          mode: stream
+          stream-mode: sample
+          sample-interval: 15s
+          paths:
+            - /system/app-management/application[name=*]
+          outputs:
+            - nats-srl-out
+        srl-net-instance:
+          mode: stream
+          stream-mode: on_change
+          heartbeat-interval: 15s
+          paths:
+            - /network-instance[name=*]/oper-state
+          outputs:
+            - nats-srl-out
+
+        # eos
+        eos-if-stats:
+          mode: stream
+          stream-mode: sample
+          sample-interval: 15s
+          paths:
+            - /interfaces/interface[name=*]/state/counters
+          outputs:
+            - nats-eos-out
+
+        eos-if-states:
+          mode: stream
+          stream-mode: on_change
+          # heartbeat-interval: 60s
+            #stream-mode: sample
+            #sample-interval: 5s
+          paths:
+            - /interfaces/interface[name=*]/state/admin-status
+            - /interfaces/interface[name=*]/state/oper-status
+            - /interfaces/interface[name=*]/state/last-change
+            - /interfaces/interface[name=*]/state/mtu
+          outputs:
+            - nats-eos-out
+
+      outputs:
+        nats-srl-out:
+          type: jetstream
+          name: gnmic-ingress-srl
+          address: nats:4222
+          stream: srl
+          create-stream:
+            description: srl telemetry data to be processed mid pipeline
+            subjects: []
+            storage: file
+            max-msgs: 3000000
+            # max-bytes:
+            # max-age:
+            # max-msg-size:
+          subject-format: subscription.target
+          # tls:
+          #   # string, path to the CA certificate file,
+          #   # this will be used to verify the clients certificates when `skip-verify` is false
+          #   ca-file:
+          #   # string, client certificate file.
+          #   cert-file:
+          #   # string, client key file.
+          #   key-file:
+          #   # boolean, if true, the client will not verify the server
+          #   # certificate against the available certificate chain.
+          #   skip-verify: false
+          connect-time-wait: 2s
+          format: event
+          split-events: false
+          override-timestamps: false
+          num-workers: 1
+          write-timeout: 5s
+          debug: false
+          buffer-size: 0
+          enable-metrics: true
+          event-processors: []
+
+        nats-eos-out:
+          type: jetstream
+          name: gnmic-ingress-eos
+          address: nats:4222
+          stream: eos
+          create-stream:
+            description: eos telemetry data to be processed mid pipeline
+            subjects: []
+            storage: file
+            max-msgs: 3000000
+            # max-bytes:
+            # max-age:
+            # max-msg-size:
+          subject-format: subscription.target
+          # tls:
+          #   # string, path to the CA certificate file,
+          #   # this will be used to verify the clients certificates when `skip-verify` is false
+          #   ca-file:
+          #   # string, client certificate file.
+          #   cert-file:
+          #   # string, client key file.
+          #   key-file:
+          #   # boolean, if true, the client will not verify the server
+          #   # certificate against the available certificate chain.
+          #   skip-verify: false
+          connect-time-wait: 2s
+          format: event
+          split-events: false
+          override-timestamps: false
+          num-workers: 1
+          write-timeout: 5s
+          debug: false
+          buffer-size: 0
+          enable-metrics: true
+          event-processors: []
+
+      api-server:
+        address: :7890
+        timeout: 10s
+        # tls:
+        #   # string, path to the CA certificate file,
+        #   # this certificate is used to verify the clients certificates.
+        #   ca-file:
+        #   # string, server certificate file.
+        #   cert-file:
+        #   # string, server key file.
+        #   key-file:
+        #   # string, one of `\"\", \"request\", \"require\", \"verify-if-given\", or \"require-verify\"
+        #   #  - request:         The server requests a certificate from the client but does not
+        #   #                     require the client to send a certificate.
+        #   #                     If the client sends a certificate, it is not required to be valid.
+        #   #  - require:         The server requires the client to send a certificate and does not
+        #   #                     fail if the client certificate is not valid.
+        #   #  - verify-if-given: The server requests a certificate,
+        #   #                     does not fail if no certificate is sent.
+        #   #                     If a certificate is sent it is required to be valid.
+        #   #  - require-verify:  The server requires the client to send a valid certificate.
+        #   #
+        #   # if no ca-file is present, `client-auth` defaults to \"\"`
+        #   # if a ca-file is set, `client-auth` defaults to \"require-verify\"`
+        # client-auth: \"\"
+        enable-metrics: true
+        debug: false
+        healthz-disable-logging: true
+  # Config file for gnmic-emitter
+  # For details see: https://gnmic.openconfig.net/user_guide/configuration_file/
+  emitter:
+    replicas: 1
+    config: |
+      log: true
+
+      inputs:
+        nats-srl:
+          type: jetstream
+          name: gnmic-srl-emitter
+          address: nats:4222
+          stream: srl
+          subjects: []
+          format: event
+          deliver-policy: new
+          subject-format: subscription.target
+          connect-time-wait: 3s
+          debug: false
+          num-workers: 1
+          buffer-size: 1000
+          fetch-batch-size: 500
+          outputs:
+            - prom-write
+          event-processors:
+            - srl-up-down-map
+
+        nats-eos:
+          type: jetstream
+          name: gnmic-eos-emitter
+          address: nats:4222
+          stream: eos
+          subjects: []
+          format: event
+          deliver-policy: new
+          subject-format: subscription.target
+          connect-time-wait: 3s
+          debug: false
+          num-workers: 1
+          buffer-size: 1000
+          fetch-batch-size: 500
+          outputs:
+            - prom-write
+          event-processors:
+            - eos-up-down-map
+
+      outputs:
+        prom-write:
+          type: prometheus_write
+          url: http://prometheus-operated:9090/api/v1/write
+          interval: 10s
+          buffer-size: 1000
+          max-time-series-per-write: 500
+          strings-as-labels: true
+          timeout: 10s
+          enable-metrics: true
+          event-processors: []
+          num-workers: 1
+          num-writers: 1
+          debug: false
+
+
+      processors:
+        # srl
+        srl-up-down-map:
+          event-strings:
+            value-names:
+              - \"oper-state\"
+            transforms:
+              - replace:
+                  apply-on: \"value\"
+                  old: \"up\"
+                  new: \"1\"
+              - replace:
+                  apply-on: \"value\"
+                  old: \"down\"
+                  new: \"0\"
+
+        # eos
+        eos-up-down-map:
+          event-strings:
+            value-names:
+              - oper-status
+              - admin-status
+            transforms:
+              - replace:
+                  apply-on: \"value\"
+                  old: \"up\"
+                  new: \"1\"
+              - replace:
+                  apply-on: \"value\"
+                  old: \"UP\"
+                  new: \"1\"
+              - replace:
+                  apply-on: \"value\"
+                  old: \"down\"
+                  new: \"0\"
+              - replace:
+                  apply-on: \"value\"
+                  old: \"DOWN\"
+                  new: \"0\"
+
+
+      api-server:
+        address: :7890
+        timeout: 10s
+        # tls:
+        #   # string, path to the CA certificate file,
+        #   # this certificate is used to verify the clients certificates.
+        #   ca-file:
+        #   # string, server certificate file.
+        #   cert-file:
+        #   # string, server key file.
+        #   key-file:
+        #   # string, one of `\"\", \"request\", \"require\", \"verify-if-given\", or \"require-verify\"
+        #   #  - request:         The server requests a certificate from the client but does not
+        #   #                     require the client to send a certificate.
+        #   #                     If the client sends a certificate, it is not required to be valid.
+        #   #  - require:         The server requires the client to send a certificate and does not
+        #   #                     fail if the client certificate is not valid.
+        #   #  - verify-if-given: The server requests a certificate,
+        #   #                     does not fail if no certificate is sent.
+        #   #                     If a certificate is sent it is required to be valid.
+        #   #  - require-verify:  The server requires the client to send a valid certificate.
+        #   #
+        #   # if no ca-file is present, `client-auth` defaults to \"\"`
+        #   # if a ca-file is set, `client-auth` defaults to \"require-verify\"`
+        enable-metrics: true
+        debug: false
+        healthz-disable-logging: true
+
+# Grafana configuration
+# For more options see: https://github.com/grafana/helm-charts/tree/main/charts/grafana
+grafana:
+  replicas: 1
+  # Grafana is too dumb for non-failing upgrades: https://github.com/grafana/helm-charts/issues/1184
+  deploymentStrategy:
+    type: Recreate
+
+  # Grafana dashboard providers configuration
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: default
+          disableDeletion: false
+          editable: true
+          folder: ""
+          options:
+            path: /var/lib/grafana/dashboards/default
+          orgId: 1
+          type: file
+        - name: kubernetes
+          orgId: 1
+          folder: Kubernetes
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/kubernetes
+        - name: gnp-stack
+          orgId: 1
+          folder: gnp-stack
+          disableDeletion: false
+          editable: true
+          type: file
+          options:
+            path:
+              /var/lib/grafana/dashboards/gnp-stack
+            foldersFromFilesStructure: true
+
+  # Default gnp-stack and kubernetes dashboards
+  dashboards:
+    default:
+    kubernetes:
+      k8s-system-api-server:
+        gnetId: 15761
+        revision: 19
+        datasource: Prometheus
+      k8s-views-global:
+        gnetId: 15757
+        revision: 43
+        datasource: Prometheus
+      k8s-views-nodes:
+        gnetId: 15759
+        revision: 35
+        datasource: Prometheus
+      k8s-views-namespaces:
+        gnetId: 15758
+        revision: 42
+        datasource: Prometheus
+      k8s-views-pods:
+        gnetId: 15760
+        revision: 36
+        datasource: Prometheus
+      k8s-volumes:
+        gnetId: 11454
+        revision: 14
+        datasource: Prometheus
+      node-exporter-full:
+        gnetId: 1860
+        revision: 39
+        datasource: Prometheus
+
+  # Grafana datasource connection to Prometheus
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - access: proxy
+          name: Prometheus
+          type: prometheus
+          url: http://prometheus-operated.gnp-stack.svc.cluster.local:9090
+          isDefault: true
+          jsonData:
+            prometheusType: Prometheus
+      deleteDatasources:
+        - name: Prometheus
+          orgId: 1
+
+  # Grafana admin user credentials
+  adminUser: admin
+  adminPassword: gnp-stack
+  # (Optional) Use existing secret for Grafana admin credentials
+  # admin:
+  #   existingSecret: grafana-admin
+
+  env:
+    GF_ANALYTICS_CHECK_FOR_UPDATES: false
+    GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: false
+    GF_ANALYTICS_REPORTING_ENABLED: false
+    GF_NEWS_NEWS_FEED_ENABLED: false
+
+  # (Optional) Use existing secret for Grafana environment variables
+  # envFromSecrets:
+  #   - name: grafana-oauth-client-secret
+
+  # Grafana configuration file settings
+  grafana.ini:
+    analytics:
+      check_for_updates: true
+    grafana_net:
+      url: https://grafana.net
+    log:
+      mode: console
+    paths:
+      data: /var/lib/grafana/
+      logs: /var/log/grafana
+      plugins: /var/lib/grafana/plugins
+      provisioning: /etc/grafana/provisioning
+    server:
+      root_url: https://grafana.gnp-stack.ch
+
+  imageRenderer:
+    enabled: false
+
+  persistence:
+    enabled: true
+    size: 10Gi
+
+  rbac:
+    pspEnabled: false
+
+  # resources:
+  #   limits:
+  #     memory: 512Mi
+  #   requests:
+  #     cpu: 50m
+  #     memory: 128Mi
+
+  # ingress:
+  #   enabled: true
+  #   ingressClassName: nginx
+  #   annotations:
+  #     cert-manager.io/issuer: letsencrypt-dns01-prod
+  #   path: /
+  #   pathType: Prefix
+  #   hosts:
+  #     - grafana.gnp-stack.ch
+  #   tls:
+  #     - secretName: grafana-tls
+  #       hosts:
+  #         - grafana.gnp-stack.ch
+
+  serviceAccount:
+    create: true
+    autoMount: true
+
+  # Grafana monitor to monitor itself
+  serviceMonitor:
+    enabled: true
+
+  sidecar:
+    dashboards:
+      enabled: true
+      searchNamespace: ALL
+      label: grafana_dashboard
+      folderAnnotation: grafana_folder
+      provider:
+        folder: gnp-stack
+        disableDelete: true
+        foldersFromFilesStructure: true
+    datasources:
+      enabled: true
+      searchNamespace: ALL
+      labelValue: ""
+
+  testFramework:
+    enabled: false
+
+# Prometheus configuration
+# For more options see: https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
+kube-prometheus-stack:
+  crds:
+    enabled: false
+  # Disable externally managed components
+  alertmanager:
+    enabled: false
+  grafana:
+    enabled: false
+
+  # No rules are created by default
+  defaultRules:
+    create: false
+
+  # Kubernetes Component Scrapers
+  kubeApiServer:
+    enabled: true
+    # serviceMonitor:
+    #   metricRelabelings:
+    #     # Drop high cardinality labels
+    #     - action: drop
+    #       sourceLabels: ["__name__"]
+    #       regex: (apiserver|etcd|rest_client)_request(|_sli|_slo)_duration_seconds_bucket
+    #     - action: drop
+    #       sourceLabels: ["__name__"]
+    #       regex: (apiserver_response_sizes_bucket|apiserver_watch_events_sizes_bucket)
+  kubelet:
+    enabled: true
+    # serviceMonitor:
+    #   metricRelabelings:
+    #     # Drop high cardinality labels
+    #     - action: labeldrop
+    #       regex: (uid)
+    #     - action: labeldrop
+    #       regex: (id|name)
+    #     - action: drop
+    #       sourceLabels: ["__name__"]
+    #       regex: (rest_client_request_duration_seconds_bucket|rest_client_request_duration_seconds_sum|rest_client_request_duration_seconds_count)
+  kubeControllerManager:
+    enabled: false
+  kubeEtcd:
+    enabled: false
+  kubeScheduler:
+    enabled: false
+  kubeProxy:
+    enabled: false
+
+  # Prometheus Operator
+  prometheusOperator:
+    enabled: true
+  serviceMonitor:
+    selfMonitor: true
+  # Setting to true produces cleaner resource names, but requires a data migration because the name of the persistent volume changes.
+  # Therefore this should only be set once on initial installation.
+  cleanPrometheusOperatorObjectNames: true
+
+  # Operator Instance Configuration
+  prometheus:
+    enabled: true
+    serviceMonitor:
+      selfMonitor: true
+    prometheusSpec:
+      # scrapeInterval: ""
+      # scrapeTimeout: ""
+      enableRemoteWriteReceiver: true
+      # Do not add `prometheus` and `prometheus_replica` external labels
+      replicaExternalLabelNameClear: true
+      prometheusExternalLabelNameClear: true
+
+      # Since we are querying the infra Prometheus in the same cluster (no remote write, federation), this does not work.
+      # Therefore, the ScrapeClass below is used.
+      externalLabels:
+        cluster: infra
+      # Default ScrapeClass that adds label `cluster="infra"` to all metrics.
+      # Ignored when `honor_labels` is used (e.g. when federating other Prometheus instances).
+      scrapeClasses:
+        - name: in-cluster
+          default: true
+          relabelings:
+            - sourceLabels: [__address__]
+              regex: '(.*)'
+              targetLabel: cluster
+              replacement: infra
+
+      # Enable persistent storage
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            resources:
+              requests:
+                storage: 10Gi
+      retention: 3d
+      retentionSize: 9GiB
+
+      # TODO: Find permanent solution for Prometheus permissions error.
+      # Workaround: https://github.com/prometheus-community/helm-charts/issues/1162#issuecomment-1267895698
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+        fsGroup: 0
+        runAsNonRoot: false
+
+      # Alternative workaround: Contra: The volumeMounts name and subPath might change, so this won't work reliably.
+      # initContainers:
+      #   - name: update-permissions
+      #     image: docker.io/library/busybox:1.31.1
+      #     command: ["chown", "-R", "1000:2000", "/prometheus"]
+      #     securityContext:
+      #       readOnlyRootFilesystem: true
+      #       capabilities:
+      #         drop: ["all"]
+      #         add: ["CHOWN"]
+      #       runAsUser: 0
+      #       runAsNonRoot: false
+      #     volumeMounts:
+      #       - mountPath: /prometheus
+      #         name: prometheus-kube-prometheus-stack-db
+      #         subPath: prometheus-db
+
+      # Select all PrometheusRule, ServiceMonitor, PodMonitor, Probe, and ScrapeConfig resources found.
+      ruleSelectorNilUsesHelmValues: false
+      ruleNamespaceSelector: {}
+      ruleSelector: {}
+      serviceMonitorSelectorNilUsesHelmValues: false
+      serviceMonitorNamespaceSelector: {}
+      serviceMonitorSelector: {}
+      podMonitorSelectorNilUsesHelmValues: false
+      podMonitorNamespaceSelector: {}
+      podMonitorSelector: {}
+      probeSelectorNilUsesHelmValues: false
+      probeNamespaceSelector: {}
+      probeSelector: {}
+      scrapeConfigSelectorNilUsesHelmValues: false
+      scrapeConfigNamespaceSelector: {}
+      scrapeConfigSelector: {}
+
+# NATS configuration
+# For more options see: https://github.com/nats-io/k8s/tree/main/helm/charts/nats
+nats:
+  ############################################################
+  # NATS config
+  ############################################################
+  config:
+
+    jetstream:
+      enabled: true
+
+      fileStore:
+        enabled: true
+        dir: /data
+
+        ############################################################
+        # stateful set -> volume claim templates -> jetstream pvc
+        ############################################################
+        pvc:
+          enabled: true
+          size: 10Gi
+
+        # defaults to the PVC size
+        # maxSize:
+
+      memoryStore:
+        enabled: true
+        # ensure that container has a sufficient memory limit greater than maxSize
+        maxSize: 1Gi
+
+    nats:
+      port: 4222
+
+      ############################################################
+      # ingress
+      ############################################################
+      # service must be enabled also
+      ingress:
+        enabled: false
+        # must contain at least 1 host otherwise ingress will not be created
+        hosts: []
+        path: /
+        pathType: Exact
+        # sets to the ingress class name
+        className:
+        # set to an existing secret name to enable TLS on the ingress; applies to all hosts
+        tlsSecretName:
+
+    monitor:
+      enabled: true
+      port: 8222
+
+      ############################################################
+      # stateful set -> volume claim templates -> resolver pvc
+      ############################################################
+      pvc:
+        enabled: true
+        size: 1Gi
+
+
+  ############################################################
+  # stateful set -> pod template -> prom-exporter container
+  ############################################################
+  # config.monitor must be enabled
+  promExporter:
+    enabled: true
+    image:
+      repository: natsio/prometheus-nats-exporter
+      tag: 0.17.3
+
+    port: 7777
+
+    ############################################################
+    # prometheus pod monitor
+    ############################################################
+    podMonitor:
+      enabled: true
+  ############################################################
+  # service
+  ############################################################
+  service:
+    enabled: true
+
+    # service port options
+    # additional boolean field enable to control whether port is exposed in the service
+    # must be enabled in the config section also
+    # https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#serviceport-v1-core
+    ports:
+      nats:
+        enabled: true
+      leafnodes:
+        enabled: true
+      websocket:
+        enabled: true
+      mqtt:
+        enabled: true
+      cluster:
+        enabled: false
+      gateway:
+        enabled: false
+      monitor:
+        enabled: true
+      profiling:
+        enabled: false
