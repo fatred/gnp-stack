@@ -22,6 +22,9 @@ services:
     command: ["--config", "/app/gnmic.yaml", "--log", "subscribe"]
     networks:
       - gnp-mgmt
+    depends_on:
+      prometheus:
+        condition: service_healthy
 
   gnmic-emitter:
     image: ghcr.io/openconfig/gnmic:0.45.0
@@ -32,13 +35,16 @@ services:
     command: '--config /app/gnmic.yaml --log subscribe'
     networks:
       - gnp-mgmt
+    depends_on:
+      prometheus:
+        condition: service_healthy
 
   nats:
-    image: nats:latest
+    image: nats:2.12.4
     ports:
-      - "4222:4222"
-      - "6222:6222"
-      - "8222:8222"
+      - 4222:4222
+      - 6222:6222
+      - 8222:8222
     volumes:
       - ./nats/nats-server.conf:/nats-server.conf
       - ./nats/datastore:/data
@@ -47,15 +53,15 @@ services:
       - gnp-mgmt
 
   nats-exporter:
-    image: natsio/prometheus-nats-exporter:latest
+    image: natsio/prometheus-nats-exporter:0.19.1
     ports:
-      - "7777:7777"
+      - 7777:7777
     command: '-varz -jsz=all http://nats:8222'
     networks:
       - gnp-mgmt
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3.5.0
     #user: 65534:65534
     ports:
       - 9090:9090
@@ -68,9 +74,15 @@ services:
       --web.enable-remote-write-receiver
     networks:
       - gnp-mgmt
+    healthcheck:
+      test: ["CMD", "promtool", "check", "healthy"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 10s    
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:12.3.5
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=grafana
     volumes:
