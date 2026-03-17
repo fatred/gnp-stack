@@ -136,7 +136,7 @@ outputs:
       description: srl telemetry data to be processed mid pipeline
       subjects: []
       storage: memory
-      max-age: 1m
+      max-bytes: 2000000000
     subject-format: subscription.target
     connect-time-wait: 2s
     format: event
@@ -159,7 +159,7 @@ outputs:
       description: eos telemetry data to be processed mid pipeline
       subjects: []
       storage: memory
-      max-age: 1m
+      max-bytes: 2000000000
     subject-format: subscription.target
     connect-time-wait: 2s
     format: event
