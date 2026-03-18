@@ -19,7 +19,7 @@ services:
     volumes:
       - ./gnmic/gnmic-ingestor.yaml:/app/gnmic.yaml:ro
       - /var/run/docker.sock:/var/run/docker.sock # allows docker loader in gnmic config, only needed for demo containerlab networks
-    command: ["--config", "/app/gnmic.yaml", "--log", "subscribe"]
+    command: "--config /app/gnmic.yaml --log subscribe"
     networks:
       - gnp-mgmt
     depends_on:
@@ -32,7 +32,7 @@ services:
       - 9806:9804
     volumes:
       - ./gnmic/gnmic-emitter.yaml:/app/gnmic.yaml:ro
-    command: '--config /app/gnmic.yaml --log subscribe'
+    command: "--config /app/gnmic.yaml --log subscribe"
     networks:
       - gnp-mgmt
     depends_on:
@@ -48,7 +48,7 @@ services:
     volumes:
       - ./nats/nats-server.conf:/nats-server.conf
       - ./nats/datastore:/data
-    command: '-c /nats-server.conf'
+    command: "-c /nats-server.conf"
     networks:
       - gnp-mgmt
 
@@ -56,7 +56,7 @@ services:
     image: natsio/prometheus-nats-exporter:0.19.1
     ports:
       - 7777:7777
-    command: '-varz -jsz=all http://nats:8222'
+    command: "-jsz=all -varz http://nats:8222"
     networks:
       - gnp-mgmt
 
