@@ -1,0 +1,6 @@
+# Define here your docker compose overrides
+services:
+  gnmic-ingestor:
+    volumes:
+      - /my/path/to/gnmic-ingestor.yaml:/app/gnmic.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock # allows docker loader in gnmic config, only needed for demo containerlab networks
