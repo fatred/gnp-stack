@@ -132,25 +132,12 @@ outputs:
     address: nats:4222
     stream: srl
     create-stream:
+      retention-policy: workqueue
       description: srl telemetry data to be processed mid pipeline
       subjects: []
-      storage: file
-      max-msgs: 2000000
-      # max-bytes:
-      # max-age:
-      # max-msg-size:
+      storage: memory
+      max-bytes: 2000000000
     subject-format: subscription.target
-    # tls:
-    #   # string, path to the CA certificate file,
-    #   # this will be used to verify the clients certificates when `skip-verify` is false
-    #   ca-file:
-    #   # string, client certificate file.
-    #   cert-file:
-    #   # string, client key file.
-    #   key-file:
-    #   # boolean, if true, the client will not verify the server
-    #   # certificate against the available certificate chain.
-    #   skip-verify: false
     connect-time-wait: 2s
     format: event
     split-events: false
@@ -168,25 +155,12 @@ outputs:
     address: nats:4222
     stream: eos
     create-stream:
+      retention-policy: workqueue
       description: eos telemetry data to be processed mid pipeline
       subjects: []
-      storage: file
-      max-msgs: 2000000
-      # max-bytes:
-      # max-age:
-      # max-msg-size:
+      storage: memory
+      max-bytes: 2000000000
     subject-format: subscription.target
-    # tls:
-    #   # string, path to the CA certificate file,
-    #   # this will be used to verify the clients certificates when `skip-verify` is false
-    #   ca-file:
-    #   # string, client certificate file.
-    #   cert-file:
-    #   # string, client key file.
-    #   key-file:
-    #   # boolean, if true, the client will not verify the server
-    #   # certificate against the available certificate chain.
-    #   skip-verify: false
     connect-time-wait: 2s
     format: event
     split-events: false
@@ -201,28 +175,6 @@ outputs:
 api-server:
   address: :7890
   timeout: 10s
-  # tls:
-  #   # string, path to the CA certificate file,
-  #   # this certificate is used to verify the clients certificates.
-  #   ca-file:
-  #   # string, server certificate file.
-  #   cert-file:
-  #   # string, server key file.
-  #   key-file:
-  #   # string, one of `"", "request", "require", "verify-if-given", or "require-verify"
-  #   #  - request:         The server requests a certificate from the client but does not
-  #   #                     require the client to send a certificate.
-  #   #                     If the client sends a certificate, it is not required to be valid.
-  #   #  - require:         The server requires the client to send a certificate and does not
-  #   #                     fail if the client certificate is not valid.
-  #   #  - verify-if-given: The server requests a certificate,
-  #   #                     does not fail if no certificate is sent.
-  #   #                     If a certificate is sent it is required to be valid.
-  #   #  - require-verify:  The server requires the client to send a valid certificate.
-  #   #
-  #   # if no ca-file is present, `client-auth` defaults to ""`
-  #   # if a ca-file is set, `client-auth` defaults to "require-verify"`
-  # client-auth: ""
   enable-metrics: true
   debug: false
   healthz-disable-logging: true
